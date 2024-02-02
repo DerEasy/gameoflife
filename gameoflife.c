@@ -504,17 +504,6 @@ static bool filterEqualSquares(const void *s, void *arg) {
 }
 
 
-static bool filterDuplicateSquares(const void *s1, void *s2) {
-    return s1 == s2 ? true : compareSquares(&s1, &s2);
-}
-
-
-static bool makeDistinct(void *square, long _, void *vec) {
-    axv.filter(vec, filterDuplicateSquares, square);
-    return true;
-}
-
-
 /* PRE-CONDITION: vector is sorted! */
 static bool removeDuplicates(const void *current, void *args_) {
     struct args_removeDuplicates *args = args_;
