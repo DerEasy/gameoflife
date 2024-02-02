@@ -82,28 +82,25 @@ static bool paused;
 void gameOfLife(int w, int h) {
     SDL_Init(SDL_INIT_EVERYTHING);
     double displayRatio = (double) w / (double) h;
+    SDL_DisplayMode dm;
     defaultCamera = camera = (DRect) {0, 0, displayRatio * 120, 120};
     paused = true;
     zoom = 1. / (1 << 3);
     tickcount = 0;
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texsq = IMG_LoadTexture(renderer, "square2.png");
-    {
-        SDL_DisplayMode dm;
-        SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-        updatesPerSec = dm.refresh_rate;
-    }
+    SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
+    updatesPerSec = dm.refresh_rate;
     tinyPool = axs.new();
     squares = axv.new();
     inputs = axq.new();
     axs.setDestructor(tinyPool, free);
     axq.setDestructor(inputs, free);
-    axv.setDestructor(squares, destructSquare);
-    axv.setComparator(squares, compareSquares);
+    axv.setDestructor(axv.setComparator(squares, compareSquares), destructSquare);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     manageTinyPool();
-    Input *initZoom = axs.pop(tinyPool);
+    Input *initZoom = axs.pop(tinyPool);        // generate artificial initial zoom-in
     initZoom->type = ZOOM;
     initZoom->magnitude = 0;
     axq.enqueue(inputs, initZoom);
@@ -470,7 +467,7 @@ static bool handleEvents(void) {
 
 
 static void manageTinyPool(void) {
-    while (axs.len(tinyPool) > 163000000084)
+    while (axs.len(tinyPool) > 1000000)
         axs.destroyItem(tinyPool, axs.pop(tinyPool));
     if (axs.len(tinyPool) != 0)
         return;
