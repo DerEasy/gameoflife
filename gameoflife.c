@@ -92,7 +92,7 @@ void gameOfLife(int w, int h) {
     {
         SDL_DisplayMode dm;
         SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-        updatesPerSec = 100000;//dm.refresh_rate;
+        updatesPerSec = dm.refresh_rate;
     }
     tinyPool = axs.new();
     squares = axv.new();
