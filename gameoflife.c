@@ -74,10 +74,11 @@ static MouseTracker mouseright;
 static Uint64 updateAccumulator;
 static Uint64 updatesPerSec;
 static Uint64 tickcount;
+static Uint64 displayHz;
 static bool paused;
 
 
-void gameOfLife(int w, int h) {
+void gameOfLife(int w, int h, uint64_t updates) {
     SDL_Init(SDL_INIT_EVERYTHING);
     double displayRatio = (double) w / (double) h;
     SDL_DisplayMode dm;
@@ -89,7 +90,8 @@ void gameOfLife(int w, int h) {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texsq = IMG_LoadTexture(renderer, "square2.png");
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-    updatesPerSec = dm.refresh_rate;
+    updatesPerSec = updates ? updates : (uint64_t) dm.refresh_rate;
+    displayHz = dm.refresh_rate;
     tinyPool = axs.setDestructor(axs.new(), free);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), free);
@@ -123,20 +125,20 @@ static bool tick(void) {
 
     Uint64 endtime = SDL_GetPerformanceCounter();
     updateAccumulator += endtime - starttime;
-    ++tickcount;
     return true;
 }
 
 
 static void update(void) {
-    const Uint64 updateDuration = SDL_GetPerformanceFrequency() / updatesPerSec;
+    const Uint64 updateDuration = SDL_GetPerformanceFrequency() / displayHz;
 
     int limit = 6;
     while (updateAccumulator >= updateDuration && limit-- > 0) {
         processInputs();
-        if (!paused && tickcount % MAX(updatesPerSec / 10, 2) == 0)
+        if (!paused && tickcount % MAX((displayHz * 10) / updatesPerSec, 1) == 0)
             processLife();
         updateAccumulator -= updateDuration;
+        ++tickcount;
     }
 }
 

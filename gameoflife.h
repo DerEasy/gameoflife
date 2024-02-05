@@ -5,6 +5,8 @@
 #ifndef GAMEOFLIFE_GAMEOFLIFE_H
 #define GAMEOFLIFE_GAMEOFLIFE_H
 
-void gameOfLife(int w, int h);
+#include <stdint.h>
+
+void gameOfLife(int w, int h, uint64_t updates);
 
 #endif //GAMEOFLIFE_GAMEOFLIFE_H
