@@ -90,12 +90,10 @@ void gameOfLife(int w, int h) {
     texsq = IMG_LoadTexture(renderer, "square2.png");
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
     updatesPerSec = dm.refresh_rate;
-    tinyPool = axs.new();
-    squares = axv.new();
-    inputs = axq.new();
-    axs.setDestructor(tinyPool, free);
-    axq.setDestructor(inputs, free);
-    axv.setDestructor(axv.setComparator(squares, compareSquares), destructSquare);
+    tinyPool = axs.setDestructor(axs.new(), free);
+    squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
+    inputs = axq.setDestructor(axq.new(), free);
+
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     manageTinyPool();
     Input *initZoom = axs.pop(tinyPool);        // generate artificial initial zoom-in
@@ -136,7 +134,7 @@ static void update(void) {
     int limit = 6;
     while (updateAccumulator >= updateDuration && limit-- > 0) {
         processInputs();
-        if (!paused)
+        if (!paused && tickcount % MAX(updatesPerSec / 10, 2) == 0)
             processLife();
         updateAccumulator -= updateDuration;
     }
@@ -327,12 +325,13 @@ static void draw(void) {
     pos.w = pos.h = 1;
 
     for (axvsnap s = axv.snapshot(squares); s.i < s.len; ++s.i) {
-        SDL_Rect src, dst;
+        SDL_Rect src;
+        SDL_FRect dst;
         Square *square = s.vec[s.i];
         pos.x = square->x;
         pos.y = square->y;
-        if (sdl_getViewportRects(&camera, &pos, &vdst, &texrect, &src, &dst))
-            SDL_RenderCopy(renderer, texsq, &src, &dst);
+        if (sdl_getViewportFRects(&camera, &pos, &vdst, &texrect, &src, &dst))
+            SDL_RenderCopyF(renderer, texsq, &src, &dst);
     }
 
     SDL_RenderPresent(renderer);

@@ -37,6 +37,21 @@ typedef struct DRect {
 bool sdl_getViewportRects(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_Rect *texrect, SDL_Rect *src, SDL_Rect *dst);
 
 /**
+ * Fill source and destination rectangles for any object and viewport if that object is in drawing range.
+ * This function expects positive (> 0) values for width and height of the object and the viewport or else
+ * garbage values will be returned.
+ * @param view the viewport
+ * @param pos position and dimensions of drawable object
+ * @param vdst the SDL_Rect structure describing where to draw the viewport to
+ * @param texrect the SDL_Rect structure containing information about the texture used
+ * @param src source SDL_Rect structure to be filled
+ * @param dst destination SDL_FRect structure to be filled
+ * @return false if the object is out of drawing range, true otherwise; source and destination SDL_Rect structures
+ * are unmodified if true is returned
+ */
+bool sdl_getViewportFRects(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_Rect *texrect, SDL_Rect *src, SDL_FRect *dst);
+
+/**
  * Determine if some object is inside a viewport's boundaries.
  * More generally: Determine if two rectangles overlap.
  * @param view the viewport

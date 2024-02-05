@@ -1,5 +1,5 @@
 #include "gameoflife.h"
 
 int main(void) {
-    gameOfLife(800, 450);
+    gameOfLife(1200, 900);
 }
