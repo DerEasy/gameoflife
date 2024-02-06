@@ -205,10 +205,10 @@ static bool keepSpawns(const void *square, void *_) {
 
 static bool keepIdenticalSquares(const void *square, void *arg) {
     const Square *s = square;
-    Square ***alive = arg;
+    axvector *alive = arg;
 
-    if (s == **alive) {
-        ++*alive;
+    if (s == axv.top(alive)) {
+        axv.pop(alive);
         return true;
     } else {
         return false;
@@ -217,13 +217,13 @@ static bool keepIdenticalSquares(const void *square, void *arg) {
 
 
 static void processLife(void) {
-    axvector *alive = axv.new();
     axvector *empty = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
+    axvector *alive = axv.new();
     struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
     axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
     axv.foreach(squares, determineWorthy, (axvector *[2]) {alive, empty});
     axv.filter(axv.sort(empty), keepSpawns, NULL);
-    axv.filter(squares, keepIdenticalSquares, &(void **) {axv.data(alive)});
+    axv.filter(squares, keepIdenticalSquares, axv.reverse(alive));
     axv.extend(squares, empty);
     axv.destroy(alive);
     axv.destroy(empty);
