@@ -15,6 +15,7 @@
 #include "sdl_viewport.h"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef enum InputType {
     ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, PAUSE, GENOCIDE
@@ -71,27 +72,26 @@ static double zoom;
 static MouseTracker mouseleft;
 static MouseTracker mouseright;
 static Uint64 updateAccumulator;
+static Uint64 tickTimeAccumulator;
 static Uint64 updatesPerSec;
-static Uint64 tickcount;
-static Uint64 displayHz;
+static Uint64 gamespeed;
 static bool paused;
 
 
-void gameOfLife(int w, int h, uint64_t updates) {
+void gameOfLife(int w, int h, Uint64 updates) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     double displayRatio = (double) w / (double) h;
     SDL_DisplayMode dm;
     defaultCamera = camera = (DRect) {0, 0, displayRatio * 120, 120};
     paused = true;
     zoom = 1. / (1 << 3);
-    tickcount = 0;
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texsq = IMG_LoadTexture(renderer, "square2.png");
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-    updatesPerSec = updates ? updates : (uint64_t) dm.refresh_rate;
-    displayHz = dm.refresh_rate;
+    updatesPerSec = dm.refresh_rate;
+    gamespeed = updates ? updates : 10;
     tinyPool = axs.setDestructor(axs.new(), free);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), free);
@@ -121,22 +121,29 @@ static bool tick(void) {
     update();
     draw();
 
-    Uint64 endtime = SDL_GetPerformanceCounter();
-    updateAccumulator += endtime - starttime;
+    Uint64 difftime = SDL_GetPerformanceCounter() - starttime;
+    updateAccumulator += difftime;
+    tickTimeAccumulator += difftime;
     return true;
 }
 
 
 static void update(void) {
-    const Uint64 updateDuration = SDL_GetPerformanceFrequency() / displayHz;
+    const Uint64 updateDuration = SDL_GetPerformanceFrequency() / updatesPerSec;
+    const Uint64 gametickDuration = SDL_GetPerformanceFrequency() / gamespeed;
 
-    int limit = 6;
-    while (updateAccumulator >= updateDuration && limit-- > 0) {
-        processInputs();
-        if (!paused && tickcount % MAX((displayHz * 10) / updatesPerSec, 1) == 0)
-            processLife();
+    processInputs();
+    if (updateAccumulator >= updateDuration) {
+        if (!paused) {
+            Uint64 frametimeConsumed = 0;
+            while (tickTimeAccumulator >= gametickDuration && frametimeConsumed < updateDuration) {
+                Uint64 starttime = SDL_GetPerformanceCounter();
+                processLife();
+                frametimeConsumed += SDL_GetPerformanceCounter() - starttime;
+                tickTimeAccumulator -= gametickDuration;
+            }
+        }
         updateAccumulator -= updateDuration;
-        ++tickcount;
     }
 }
 
