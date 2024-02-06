@@ -17,7 +17,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef enum InputType {
-    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, START, PAUSE
+    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, PAUSE, GENOCIDE
 } InputType;
 
 typedef struct Square {
@@ -302,13 +302,14 @@ static void processInputs(void) {
             axv.filter(squares, filterEqualSquares, &square);
             break;
         }
-        case START: {
-            paused = false;
+        case PAUSE: {
+            paused = !paused;
             break;
         }
-        case PAUSE:
-            paused = true;
+        case GENOCIDE: {
+            axv.clear(squares);
             break;
+        }
         }
     }
 }
@@ -407,7 +408,13 @@ static bool handleEvents(void) {
             case SDLK_KP_ENTER:
             case SDLK_p: {
                 Input *input = axs.pop(tinyPool);
-                input->type = paused ? START : PAUSE;
+                input->type = PAUSE;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_BACKSPACE: {
+                Input *input = axs.pop(tinyPool);
+                input->type = GENOCIDE;
                 axq.enqueue(inputs, input);
                 break;
             }
