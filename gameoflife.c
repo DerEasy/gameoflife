@@ -194,10 +194,13 @@ static bool determineWorthy(void *square, void *args) {
         }
     }
 
+    // insertion sorting the last few items is HUGELY more efficient than
+    // calling axv.sort(empty) every damn time this function is called (which is a lot!)
     long buflen = axv.len(buffer);
     axv.extend(empty, buffer);
     axv.destroy(buffer);
     insertionSortTail(empty, buflen);
+
     if (neighbours == 2 || neighbours == 3)
         axv.push(alive, s);
 
