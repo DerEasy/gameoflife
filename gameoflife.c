@@ -48,7 +48,7 @@ struct args_removeDuplicates {
 
 static bool tick(void);
 static bool handleEvents(void);
-static void manageTinyPool(void);
+static void *getTinyMemory(void);
 static void update(void);
 static void draw(void);
 static void destructSquare(void *);
@@ -96,9 +96,8 @@ void gameOfLife(int w, int h, uint64_t updates) {
     tinyPool = axs.setDestructor(axs.new(), free);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), free);
-
-    manageTinyPool();
-    Input *initZoom = axs.pop(tinyPool);        // generate artificial initial zoom-in
+    
+    Input *initZoom = getTinyMemory();        // generate artificial initial zoom-in
     initZoom->type = ZOOM;
     initZoom->magnitude = 0;
     axq.enqueue(inputs, initZoom);
@@ -166,17 +165,17 @@ static void insertionSortTail(axvector *v, long n) {
 
 
 static bool determineWorthy(void *square, void *args) {
-    axvector *alive = ((axvector **) args)[0];
-    axvector *empty = ((axvector **) args)[1];
-    axvector *buffer = axv.sizedNew(8);
+    axvector *survivors = ((axvector **) args)[0];
+    axvector *potentials = ((axvector **) args)[1];
     Square *s = square;
+    long taillen = 0;
     int neighbours = 0;
 
     // removing duplicates is almost as bad as just doing linear search
-    //struct args_removeDuplicates argsrd = {axv.getComparator(empty), NULL};
-    //axv.filter(axv.sort(empty), removeDuplicates, &argsrd);
+    //struct args_removeDuplicates argsrd = {axv.getComparator(potentials), NULL};
+    //axv.filter(axv.sort(potentials), removeDuplicates, &argsrd);
     // this little shit hogs up 55,43% of cpu time
-    //axv.sort(empty);
+    //axv.sort(potentials);
     // should definitely consider using some inherently ordered data structure like rb-trees
 
     for (double offsetX = -1; offsetX <= +1; ++offsetX) {
@@ -184,34 +183,31 @@ static bool determineWorthy(void *square, void *args) {
             if (offsetX == 0 && offsetY == 0)
                 continue;
 
-            Square ns = {s->x + offsetX, s->y + offsetY};
-            long i = axv.binarySearch(squares, &ns);
+            Square neighbour = {s->x + offsetX, s->y + offsetY};
+            long i = axv.binarySearch(squares, &neighbour);
             neighbours += i != -1;
 
-            if (i == -1 && axv.binarySearch(empty, &ns) == -1) {
-                manageTinyPool();
-                Square *inspectable = axs.pop(tinyPool);
-                *inspectable = ns;
-                axv.push(buffer, inspectable);
+            if (i == -1 && axv.binarySearch(potentials, &neighbour) == -1) {
+                Square *potential = getTinyMemory();
+                *potential = neighbour;
+                axv.push(potentials, potential);
+                ++taillen;
             }
         }
     }
 
     // insertion sorting the last few items is HUGELY more efficient than
-    // calling axv.sort(empty) every damn time this function is called (which is a lot!)
-    long buflen = axv.len(buffer);
-    axv.extend(empty, buffer);
-    axv.destroy(buffer);
-    insertionSortTail(empty, buflen);
+    // calling axv.sort(potentials) every damn time this function is called (which is a lot!)
+    insertionSortTail(potentials, taillen);
 
     if (neighbours == 2 || neighbours == 3)
-        axv.push(alive, s);
+        axv.push(survivors, s);
 
     return true;
 }
 
 
-static bool keepSpawns(const void *square, void *_) {
+static bool determineSpawning(const void *square, void *_) {
     const Square *s = square;
     int neighbours = 0;
 
@@ -247,16 +243,16 @@ static bool keepIdenticalSquares(const void *square, void *arg) {
 
 
 static void processLife(void) {
-    axvector *empty = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
-    axvector *alive = axv.new();
+    axvector *potentials = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
+    axvector *survivors = axv.new();
     struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
     axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
-    axv.foreach(squares, determineWorthy, (axvector *[2]) {alive, empty});
-    axv.filter(empty, keepSpawns, NULL);
-    axv.filter(squares, keepIdenticalSquares, axv.reverse(alive));
-    axv.extend(squares, empty);
-    axv.destroy(alive);
-    axv.destroy(empty);
+    axv.foreach(squares, determineWorthy, (axvector *[2]) {survivors, potentials});
+    axv.filter(potentials, determineSpawning, NULL);
+    axv.filter(squares, keepIdenticalSquares, axv.reverse(survivors));
+    axv.extend(squares, potentials);
+    axv.destroy(survivors);
+    axv.destroy(potentials);
 }
 
 
@@ -294,8 +290,7 @@ static void processInputs(void) {
             break;
         }
         case SQUARE_PLACE: {
-            manageTinyPool();
-            Square *square = axs.pop(tinyPool);
+            Square *square = getTinyMemory();
             int rw;
             SDL_GetRendererOutputSize(renderer, &rw, NULL);
             double ratio = rw / camera.w;
@@ -334,20 +329,19 @@ static void draw(void) {
     SDL_Rect vdst;
     vdst.x = vdst.y = 0;
     SDL_GetRendererOutputSize(renderer, &vdst.w, &vdst.h);
-    SDL_Rect texrect;
-    texrect.x = texrect.y = 0;
-    SDL_QueryTexture(texsq, NULL, NULL, &texrect.w, &texrect.h);
+    SDL_Rect src;
+    src.x = src.y = 0;
+    SDL_QueryTexture(texsq, NULL, NULL, &src.w, &src.h);
     DRect pos;
     pos.w = pos.h = 1;
 
     for (axvsnap s = axv.snapshot(squares); s.i < s.len; ++s.i) {
-        SDL_Rect src;
         SDL_FRect dst;
         Square *square = s.vec[s.i];
         pos.x = square->x;
         pos.y = square->y;
-        if (sdl_getViewportFRects(&camera, &pos, &vdst, &texrect, &src, &dst))
-            SDL_RenderCopyF(renderer, texsq, &src, &dst);
+        if (sdl_getViewportDstFRect(&camera, &pos, &vdst, &dst))
+            SDL_RenderCopyF(renderer, texsq, NULL, &dst);
     }
 
     SDL_RenderPresent(renderer);
@@ -359,15 +353,13 @@ static bool handleEvents(void) {
         axs.push(tinyPool, axq.dequeue(inputs));
 
     for (SDL_Event e; SDL_PollEvent(&e); ) {
-        manageTinyPool();
-
         if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
             case SDLK_ESCAPE:
                 return true;
             case SDLK_UP:
             case SDLK_w: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = CAMERA_VERTICAL;
                 input->magnitude = -1;
                 input->usedMouse = false;
@@ -376,7 +368,7 @@ static bool handleEvents(void) {
             }
             case SDLK_DOWN:
             case SDLK_s: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = CAMERA_VERTICAL;
                 input->magnitude = 1;
                 input->usedMouse = false;
@@ -385,7 +377,7 @@ static bool handleEvents(void) {
             }
             case SDLK_LEFT:
             case SDLK_a: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = CAMERA_HORIZONTAL;
                 input->magnitude = -1;
                 input->usedMouse = false;
@@ -394,7 +386,7 @@ static bool handleEvents(void) {
             }
             case SDLK_RIGHT:
             case SDLK_d: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = CAMERA_HORIZONTAL;
                 input->magnitude = 1;
                 input->usedMouse = false;
@@ -403,7 +395,7 @@ static bool handleEvents(void) {
             }
             case SDLK_PLUS:
             case SDLK_KP_PLUS: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = ZOOM;
                 input->magnitude = 1;
                 axq.enqueue(inputs, input);
@@ -411,7 +403,7 @@ static bool handleEvents(void) {
             }
             case SDLK_MINUS:
             case SDLK_KP_MINUS: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = ZOOM;
                 input->magnitude = -1;
                 axq.enqueue(inputs, input);
@@ -420,13 +412,13 @@ static bool handleEvents(void) {
             case SDLK_RETURN:
             case SDLK_KP_ENTER:
             case SDLK_p: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = PAUSE;
                 axq.enqueue(inputs, input);
                 break;
             }
             case SDLK_BACKSPACE: {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = GENOCIDE;
                 axq.enqueue(inputs, input);
                 break;
@@ -441,13 +433,12 @@ static bool handleEvents(void) {
 
         else if (e.type == SDL_MOUSEMOTION) {
             if (e.motion.state & (SDL_BUTTON_LMASK | SDL_BUTTON_RMASK)) {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = CAMERA_VERTICAL;
                 input->magnitude = -e.motion.yrel;
                 input->usedMouse = true;
                 axq.enqueue(inputs, input);
-                manageTinyPool();
-                input = axs.pop(tinyPool);
+                input = getTinyMemory();
                 input->type = CAMERA_HORIZONTAL;
                 input->magnitude = -e.motion.xrel;
                 input->usedMouse = true;
@@ -462,7 +453,7 @@ static bool handleEvents(void) {
             SDL_GetMouseState(&xUp, &yUp);
 
             if (tracker->xDown == xUp && tracker->yDown == yUp) {
-                Input *input = axs.pop(tinyPool);
+                Input *input = getTinyMemory();
                 input->type = left ? SQUARE_PLACE : SQUARE_DELETE;
                 input->x = xUp;
                 input->y = yUp;
@@ -471,7 +462,7 @@ static bool handleEvents(void) {
         }
 
         else if (e.type == SDL_MOUSEWHEEL) {
-            Input *input = axs.pop(tinyPool);
+            Input *input = getTinyMemory();
             input->type = ZOOM;
             input->magnitude = e.wheel.preciseY;
             axq.enqueue(inputs, input);
@@ -485,11 +476,11 @@ static bool handleEvents(void) {
 }
 
 
-static void manageTinyPool(void) {
+static void *getTinyMemory(void) {
     while (axs.len(tinyPool) > 1000000)
         axs.destroyItem(tinyPool, axs.pop(tinyPool));
     if (axs.len(tinyPool) != 0)
-        return;
+        return axs.pop(tinyPool);
 
     for (int i = 0; i < 16; ++i) {
         void *p = malloc(MAX(sizeof(Input), sizeof(Square)));
@@ -498,6 +489,8 @@ static void manageTinyPool(void) {
             abort();
         }
     }
+    
+    return axs.pop(tinyPool);
 }
 
 

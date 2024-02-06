@@ -2,7 +2,7 @@
 /cmake-build-debug/.cmake/
 /cmake-build-debug/CMakeFiles/
 /cmake-build-debug/Testing/
-/cmake-build-debug/CMakeCache.txt/
-/cmake-build-debug/cmake_install.cmake/
-/cmake-build-debug/gameoflife.cbp/
 /.idea/
+/cmake-build-debug/cmake_install.cmake
+/cmake-build-debug/CMakeCache.txt
+/cmake-build-debug/gameoflife.cbp

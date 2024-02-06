@@ -52,6 +52,32 @@ bool sdl_getViewportRects(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_Rect *tex
 bool sdl_getViewportFRects(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_Rect *texrect, SDL_Rect *src, SDL_FRect *dst);
 
 /**
+ * Fill only destination rectangle for any object and viewport if that object is in drawing range.
+ * This function expects positive (> 0) values for width and height of the object and the viewport or else
+ * garbage values will be returned.
+ * @param view the viewport
+ * @param pos position and dimensions of drawable object
+ * @param vdst the SDL_Rect structure describing where to draw the viewport to
+ * @param dst destination SDL_Rect structure to be filled
+ * @return false if the object is out of drawing range, true otherwise;
+ * destination is unmodified if true is returned
+ */
+bool sdl_getViewportDstRect(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_Rect *dst);
+
+/**
+ * Fill only destination rectangle for any object and viewport if that object is in drawing range.
+ * This function expects positive (> 0) values for width and height of the object and the viewport or else
+ * garbage values will be returned.
+ * @param view the viewport
+ * @param pos position and dimensions of drawable object
+ * @param vdst the SDL_Rect structure describing where to draw the viewport to
+ * @param dst destination SDL_FRect structure to be filled
+ * @return false if the object is out of drawing range, true otherwise;
+ * destination is unmodified if true is returned
+ */
+bool sdl_getViewportDstFRect(DRect *view, DRect *pos, SDL_Rect *vdst, SDL_FRect *dst);
+
+/**
  * Determine if some object is inside a viewport's boundaries.
  * More generally: Determine if two rectangles overlap.
  * @param view the viewport
