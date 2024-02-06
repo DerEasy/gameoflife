@@ -217,13 +217,28 @@ static axvector *rotate(axvector *v, long n) {
 }
 
 
-static bool shift(axvector *v, long index, unsigned long n) {
+static bool shift(axvector *v, long index, long n) {
     if (n == 0)
         return false;
-    if (v->len + n > v->cap && resize(v, v->len + n))
-        return true;
 
-    memmove(v->items + index + n, v->items + index, toItemSize(v->len - n - 1));
+    if (n > 0) {
+        const ulong oldlen = v->len;
+        if (v->len + n > v->cap && resize(v, v->len + n))
+            return true;
+        memmove(v->items + index + n, v->items + index, toItemSize(oldlen - n - 1));
+        memset(v->items + index, 0, toItemSize(n));
+        if (oldlen == v->len)
+            v->len += n;
+    } else {
+        n = MIN(-n, len(v) - index);
+        if (v->destroy) {
+            for (long i = index; i < index + n; ++i)
+                v->destroy(v->items[i]);
+        }
+        memmove(v->items + index, v->items + index + n, toItemSize(v->len - index - n));
+        v->len -= n;
+    }
+
     return false;
 }
 
@@ -260,6 +275,32 @@ static axvector *copy(axvector *v) {
     v2->context = v->context;
     v2->destroy = NULL;
     return v2;
+}
+
+
+static bool extend(axvector *v1, axvector *v2) {
+    if (v1 == v2)
+        return false;
+
+    const ulong extlen = v1->len + v2->len;
+    if (extlen > v1->cap && resize(v1, extlen))
+        return true;
+
+    memcpy(v1->items + v1->len, v2->items, toItemSize(v2->len));
+    v1->len = extlen;
+    v2->len = 0;
+    return false;
+}
+
+
+static bool concat(axvector *v1, axvector *v2) {
+    const ulong extlen = v1->len + v2->len;
+    if (extlen > v1->cap && resize(v1, extlen))
+        return true;
+
+    memcpy(v1->items + v1->len, v2->items, toItemSize(v2->len));
+    v1->len = extlen;
+    return false;
 }
 
 
@@ -452,10 +493,10 @@ static axvector *filterSplit(axvector *v, bool (*f)(const void *, void *), void 
 }
 
 
-static void *foreach(axvector *v, bool (*f)(void *, long, void *), void *arg) {
+static axvector *foreach(axvector *v, bool (*f)(void *, void *), void *arg) {
     const long length = len(v);
     for (long i = 0; i < length; ++i) {
-        if (!f(v->items[i], i, arg)) {
+        if (!f(v->items[i], arg)) {
             return arg;
         }
     }
@@ -464,9 +505,9 @@ static void *foreach(axvector *v, bool (*f)(void *, long, void *), void *arg) {
 }
 
 
-static void *rforeach(axvector *v, bool (*f)(void *, long, void *), void *arg) {
+static axvector *rforeach(axvector *v, bool (*f)(void *, void *), void *arg) {
     for (long i = len(v) - 1; i >= 0; --i) {
-        if (!f(v->items[i], i, arg)) {
+        if (!f(v->items[i], arg)) {
             return arg;
         }
     }
@@ -475,15 +516,15 @@ static void *rforeach(axvector *v, bool (*f)(void *, long, void *), void *arg) {
 }
 
 
-static void *forSection(axvector *v, bool (*f)(void *, long, void *), void *arg,
-                        long index1, long index2) {
+static axvector *forSection(axvector *v, bool (*f)(void *, void *), void *arg,
+                            long index1, long index2) {
 
     long i1 = normaliseIndex(v->len, index1).s;
     long i2 = normaliseIndex(v->len, index2).s;
     i2 = MIN(len(v), i2); i2 = MAX(0, i2);
 
     for (long i = i1; i < i2; ++i) {
-        if (!f(v->items[i], i, arg)) {
+        if (!f(v->items[i], arg)) {
             return v;
         }
     }
@@ -622,6 +663,8 @@ const struct axvectorFn axv = {
         discard,
         clear,
         copy,
+        extend,
+        concat,
         slice,
         rslice,
         resize,

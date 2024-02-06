@@ -11,10 +11,10 @@
 				<Option working_dir="/home/easy/CLionProjects/gameoflife/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gameoflife">
@@ -25,16 +25,16 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/include/SDL2"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/13/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 gameoflife"/>
-					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 gameoflife"/>
+					<CompileFile command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gameoflife/fast">
@@ -45,36 +45,36 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/include/SDL2"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/13/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 gameoflife/fast"/>
-					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 gameoflife/fast"/>
+					<CompileFile command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/home/easy/CLionProjects/gameoflife/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
 				<Option working_dir="/home/easy/CLionProjects/gameoflife/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j12 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j8 -f &quot;/home/easy/CLionProjects/gameoflife/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>

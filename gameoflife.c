@@ -143,7 +143,7 @@ static void update(void) {
 }
 
 
-static bool determineWorthy(void *square, long _, void *args) {
+static bool determineWorthy(void *square, void *args) {
     axvector *alive = ((axvector **) args)[0];
     axvector *empty = ((axvector **) args)[1];
     Square *s = square;
@@ -217,17 +217,15 @@ static bool keepIdenticalSquares(const void *square, void *arg) {
 
 
 static void processLife(void) {
-    struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
-    axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
     axvector *alive = axv.new();
     axvector *empty = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
+    struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
+    axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
     axv.foreach(squares, determineWorthy, (axvector *[2]) {alive, empty});
-    axv.sort(empty);
-    axv.filter(empty, keepSpawns, NULL);
+    axv.filter(axv.sort(empty), keepSpawns, NULL);
     axv.filter(squares, keepIdenticalSquares, &(void **) {axv.data(alive)});
+    axv.extend(squares, empty);
     axv.destroy(alive);
-    while (axv.len(empty))
-        axv.push(squares, axv.pop(empty));
     axv.destroy(empty);
 }
 
