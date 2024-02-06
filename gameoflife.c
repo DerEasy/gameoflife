@@ -54,7 +54,6 @@ static void draw(void);
 static void destructSquare(void *);
 static bool filterEqualSquares(const void *, void *);
 static bool removeDuplicates(const void *, void *);
-static void *printSquare(void *);
 static int compareSquares(const void *, const void *);
 static void processInputs(void);
 static void processLife(void);
@@ -79,7 +78,7 @@ static bool paused;
 
 
 void gameOfLife(int w, int h, uint64_t updates) {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     double displayRatio = (double) w / (double) h;
     SDL_DisplayMode dm;
     defaultCamera = camera = (DRect) {0, 0, displayRatio * 120, 120};
@@ -208,6 +207,7 @@ static bool determineWorthy(void *square, void *args) {
 
 
 static bool determineSpawning(const void *square, void *_) {
+    (void) _;
     const Square *s = square;
     int neighbours = 0;
 
@@ -329,9 +329,6 @@ static void draw(void) {
     SDL_Rect vdst;
     vdst.x = vdst.y = 0;
     SDL_GetRendererOutputSize(renderer, &vdst.w, &vdst.h);
-    SDL_Rect src;
-    src.x = src.y = 0;
-    SDL_QueryTexture(texsq, NULL, NULL, &src.w, &src.h);
     DRect pos;
     pos.w = pos.h = 1;
 
@@ -340,8 +337,10 @@ static void draw(void) {
         Square *square = s.vec[s.i];
         pos.x = square->x;
         pos.y = square->y;
-        if (sdl_getViewportDstFRect(&camera, &pos, &vdst, &dst))
+        if (sdl_inViewport(&camera, &pos)) {
+            sdl_getViewportDstFRect(&camera, &pos, &vdst, &dst);
             SDL_RenderCopyF(renderer, texsq, NULL, &dst);
+        }
     }
 
     SDL_RenderPresent(renderer);
@@ -523,11 +522,4 @@ static bool removeDuplicates(const void *current, void *args_) {
         args->origin = (void *) current;
         return true;
     }
-}
-
-
-static void *printSquare(void *square) {
-    Square *s = square;
-    printf("(%g|%g)\n", s->x, s->y);
-    return s;
 }
