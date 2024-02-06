@@ -18,7 +18,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef enum InputType {
-    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, PAUSE, GENOCIDE
+    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED
 } InputType;
 
 typedef struct Square {
@@ -325,6 +325,18 @@ static void processInputs(void) {
             axv.clear(squares);
             break;
         }
+        case GAMESPEED: {
+            SDL_Keymod mod = SDL_GetModState();
+            Sint64 speedOffset = (Sint64) input->magnitude;
+            if (mod & KMOD_CTRL)
+                speedOffset *= 100;
+            else if (mod & KMOD_SHIFT)
+                speedOffset *= 10;
+            gamespeed += speedOffset;
+            if ((Sint64) gamespeed < 1)
+                gamespeed = 1;
+            break;
+        }
         }
     }
 }
@@ -426,6 +438,20 @@ static bool handleEvents(void) {
             case SDLK_BACKSPACE: {
                 Input *input = getTinyMemory();
                 input->type = GENOCIDE;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_q: {
+                Input *input = getTinyMemory();
+                input->type = GAMESPEED;
+                input->magnitude = -1;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_e: {
+                Input *input = getTinyMemory();
+                input->type = GAMESPEED;
+                input->magnitude = 1;
                 axq.enqueue(inputs, input);
                 break;
             }
