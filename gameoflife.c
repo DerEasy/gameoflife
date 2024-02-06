@@ -18,7 +18,8 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef enum InputType {
-    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE, SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED
+    ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE,
+    SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED, WINDOW_RESIZE
 } InputType;
 
 typedef struct Square {
@@ -53,6 +54,7 @@ static void *getTinyMemory(void);
 static void update(void);
 static void draw(void);
 static void destructSquare(void *);
+static void destructInput(void *);
 static bool filterEqualSquares(const void *, void *);
 static bool removeDuplicates(const void *, void *);
 static int compareSquares(const void *, const void *);
@@ -80,26 +82,21 @@ static bool paused;
 
 void gameOfLife(int w, int h, Uint64 updates) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-    double displayRatio = (double) w / (double) h;
-    SDL_DisplayMode dm;
-    defaultCamera = camera = (DRect) {0, 0, displayRatio * 120, 120};
-    paused = true;
-    zoom = 1. / (1 << 3);
-    window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
+
+    window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texsq = IMG_LoadTexture(renderer, "square2.png");
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-    updatesPerSec = dm.refresh_rate;
-    gamespeed = updates ? updates : 10;
-    tinyPool = axs.setDestructor(axs.new(), free);
+    SDL_DisplayMode dm; SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
-    inputs = axq.setDestructor(axq.new(), free);
-    
-    Input *initZoom = getTinyMemory();        // generate artificial initial zoom-in
-    initZoom->type = ZOOM;
-    initZoom->magnitude = 0;
-    axq.enqueue(inputs, initZoom);
+    inputs = axq.setDestructor(axq.new(), destructInput);
+    tinyPool = axs.setDestructor(axs.new(), free);
+    gamespeed = updates ? updates : 10;
+    updatesPerSec = dm.refresh_rate;
+    zoom = 1. / (1 << 2);
+    paused = true;
+    defaultCamera = (DRect) {0, 0, 120, ((double) h / (double) w) * 120};   // display ratio in height
+    camera = (DRect) {0, 0, defaultCamera.w * zoom, defaultCamera.h * zoom};
 
     while (tick());
 
@@ -270,14 +267,14 @@ static void processInputs(void) {
         switch (input->type) {
         case CAMERA_VERTICAL: {
             if (input->usedMouse)
-                camera.y += input->magnitude * zoom / 5;
+                camera.y += input->magnitude * zoom / 8;
             else
                 camera.y += input->magnitude;
             break;
         }
         case CAMERA_HORIZONTAL: {
             if (input->usedMouse)
-                camera.x += input->magnitude * zoom / 5;
+                camera.x += input->magnitude * zoom / 8;
             else
                 camera.x += input->magnitude;
             break;
@@ -335,6 +332,15 @@ static void processInputs(void) {
             gamespeed += speedOffset;
             if ((Sint64) gamespeed < 1)
                 gamespeed = 1;
+            break;
+        }
+        case WINDOW_RESIZE: {
+            double displayRatio = (double) input->y / (double) input->x;
+            SDL_DisplayMode dm;
+            SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
+            defaultCamera = (DRect) {0, 0, 120, displayRatio * 120};
+            camera.w = defaultCamera.w * zoom;
+            camera.h = defaultCamera.h * zoom;
             break;
         }
         }
@@ -500,6 +506,16 @@ static bool handleEvents(void) {
             axq.enqueue(inputs, input);
         }
 
+        else if (e.type == SDL_WINDOWEVENT) {
+            if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                Input *input = getTinyMemory();
+                input->type = WINDOW_RESIZE;
+                input->x = e.window.data1;
+                input->y = e.window.data2;
+                axq.enqueue(inputs, input);
+            }
+        }
+
         else if (e.type == SDL_QUIT)
             return true;
     }
@@ -528,6 +544,11 @@ static void *getTinyMemory(void) {
 
 static void destructSquare(void *s) {
     if (s) axs.push(tinyPool, s);
+}
+
+
+static void destructInput(void *i) {
+    if (i) axs.push(tinyPool, i);
 }
 
 
