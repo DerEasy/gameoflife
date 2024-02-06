@@ -1,1 +1,0 @@
-/usr/bin/gcc -g CMakeFiles/gameoflife.dir/main.c.o CMakeFiles/gameoflife.dir/axvector.c.o CMakeFiles/gameoflife.dir/axqueue.c.o CMakeFiles/gameoflife.dir/axstack.c.o CMakeFiles/gameoflife.dir/gameoflife.c.o CMakeFiles/gameoflife.dir/sdl_viewport.c.o -o gameoflife  -lSDL2 -lSDL2_image -lm 
