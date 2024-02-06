@@ -21,8 +21,13 @@ CMakeFiles/gameoflife.dir/axqueue.c.o: /home/easy/CLionProjects/gameoflife/axque
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -73,8 +78,13 @@ CMakeFiles/gameoflife.dir/axstack.c.o: /home/easy/CLionProjects/gameoflife/axsta
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -125,8 +135,13 @@ CMakeFiles/gameoflife.dir/axvector.c.o: /home/easy/CLionProjects/gameoflife/axve
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -243,10 +258,17 @@ CMakeFiles/gameoflife.dir/gameoflife.c.o: /home/easy/CLionProjects/gameoflife/ga
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdio.h \
+  /usr/include/x86_64-linux-gnu/bits/stdio2.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -276,6 +298,7 @@ CMakeFiles/gameoflife.dir/gameoflife.c.o: /home/easy/CLionProjects/gameoflife/ga
   /usr/include/x86_64-linux-gnu/bits/waitflags.h \
   /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
   /usr/include/x86_64-linux-gnu/bits/wchar.h \
+  /usr/include/x86_64-linux-gnu/bits/wchar2.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -403,9 +426,14 @@ CMakeFiles/gameoflife.dir/main.c.o: /home/easy/CLionProjects/gameoflife/main.c \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -520,10 +548,17 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdio.h \
+  /usr/include/x86_64-linux-gnu/bits/stdio2.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
@@ -553,6 +588,7 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
   /usr/include/x86_64-linux-gnu/bits/waitflags.h \
   /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
   /usr/include/x86_64-linux-gnu/bits/wchar.h \
+  /usr/include/x86_64-linux-gnu/bits/wchar2.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -730,11 +766,17 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/bmi2intrin.h:
 
-/usr/include/SDL2/SDL_image.h:
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avxvnniintrin.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx2intrin.h:
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vpopcntdqintrin.h:
 
-/usr/include/SDL2/SDL_keyboard.h:
+/usr/lib/gcc/x86_64-linux-gnu/11/include/uintrintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vp2intersectvlintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vp2intersectintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vnniintrin.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
@@ -742,23 +784,9 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/SDL2/SDL_clipboard.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/popcntintrin.h:
-
-/usr/include/SDL2/SDL_joystick.h:
-
-/usr/include/SDL2/SDL_blendmode.h:
-
 /usr/include/x86_64-linux-gnu/sys/types.h:
 
 /usr/include/SDL2/SDL_atomic.h:
-
-/usr/include/SDL2/SDL.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/cldemoteintrin.h:
-
-/usr/include/stdc-predef.h:
-
-/home/easy/CLionProjects/gameoflife/sdl_viewport.h:
 
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
@@ -786,6 +814,8 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h:
 
+/usr/include/SDL2/SDL.h:
+
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/f16cintrin.h:
@@ -798,9 +828,13 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vp2intersectintrin.h:
+/usr/include/SDL2/SDL_audio.h:
+
+/usr/local/include/axqueue.h:
+
+/usr/include/stdio.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
 
@@ -820,6 +854,12 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
 
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
 /usr/include/SDL2/SDL_filesystem.h:
@@ -828,13 +868,19 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/pmmintrin.h:
-
-/usr/include/wchar.h:
-
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/cldemoteintrin.h:
+
+/home/easy/CLionProjects/gameoflife/sdl_viewport.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/SDL2/SDL_keyboard.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/endian.h:
 
@@ -851,6 +897,12 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/SDL2/SDL_main.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/tmmintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vnnivlintrin.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/SDL2/SDL_render.h:
 
@@ -878,27 +930,7 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/SDL2/SDL_cpuinfo.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
-
-/home/easy/CLionProjects/gameoflife/gameoflife.h:
-
-/usr/include/SDL2/SDL_audio.h:
-
-/usr/local/include/axqueue.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
-
-/usr/include/stdio.h:
-
-/usr/include/SDL2/SDL_loadso.h:
-
-/usr/include/strings.h:
-
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-/usr/include/SDL2/SDL_scancode.h:
-
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
@@ -912,6 +944,38 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
+/usr/include/SDL2/SDL_loadso.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/xtestintrin.h:
+
+/usr/include/SDL2/SDL_sensor.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/pmmintrin.h:
+
+/usr/include/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio.h:
+
+/usr/include/strings.h:
+
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
+
+/usr/include/SDL2/SDL_scancode.h:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/x86_64-linux-gnu/bits/strings_fortified.h:
+
+/usr/include/SDL2/SDL_gamecontroller.h:
+
+/usr/include/SDL2/SDL_timer.h:
+
+/usr/include/inttypes.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/emmintrin.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
 /usr/include/SDL2/SDL_events.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
@@ -919,6 +983,20 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx2intrin.h:
+
+/usr/include/SDL2/SDL_image.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/popcntintrin.h:
+
+/usr/include/SDL2/SDL_blendmode.h:
+
+/usr/include/SDL2/SDL_joystick.h:
+
+/home/easy/CLionProjects/gameoflife/gameoflife.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 
 /usr/include/SDL2/SDL_keycode.h:
 
@@ -948,10 +1026,6 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/include/SDL2/SDL_quit.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/xtestintrin.h:
-
-/usr/include/SDL2/SDL_sensor.h:
-
 /usr/include/SDL2/SDL_shape.h:
 
 /usr/include/SDL2/SDL_stdinc.h:
@@ -976,16 +1050,6 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/amxint8intrin.h:
 
-/usr/include/SDL2/SDL_gamecontroller.h:
-
-/usr/include/SDL2/SDL_timer.h:
-
-/usr/include/inttypes.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/emmintrin.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
-
 /usr/include/SDL2/SDL_touch.h:
 
 /usr/include/SDL2/SDL_version.h:
@@ -1000,9 +1064,11 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/mmintrin.h:
 
-/usr/include/SDL2/SDL_hidapi.h:
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/SDL2/SDL_hidapi.h:
 
 /usr/include/x86_64-linux-gnu/SDL2/_real_SDL_config.h:
 
@@ -1011,8 +1077,6 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 /usr/include/SDL2/SDL_hints.h:
 
 /usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
 /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h:
 
@@ -1025,6 +1089,8 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
 /usr/include/SDL2/SDL_endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
@@ -1070,38 +1136,24 @@ CMakeFiles/gameoflife.dir/sdl_viewport.c.o: /home/easy/CLionProjects/gameoflife/
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512bwintrin.h:
 
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vpopcntdqvlintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512erintrin.h:
+
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512fintrin.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512ifmaintrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vldqintrin.h:
 
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512pfintrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vbmi2intrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vbmi2vlintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vnniintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/tmmintrin.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vnnivlintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/uintrintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vp2intersectvlintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vpopcntdqintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512erintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vpopcntdqvlintrin.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/avxvnniintrin.h:

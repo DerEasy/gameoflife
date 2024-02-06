@@ -145,6 +145,9 @@ static void update(void) {
 
 // insertion sort the last n items into the vector (obvious pre-condition: rest of vector is sorted)
 static void insertionSortTail(axvector *v, long n) {
+    if (n <= 0)
+        return;
+
     axvsnap s1 = axv.snapshot(v);
     s1.i = axv.len(v) - n;
     axvsnap s2 = axv.snapshot(v);
@@ -165,7 +168,7 @@ static void insertionSortTail(axvector *v, long n) {
 static bool determineWorthy(void *square, void *args) {
     axvector *alive = ((axvector **) args)[0];
     axvector *empty = ((axvector **) args)[1];
-    axvector *buffer = axv.setComparator(axv.sizedNew(8), compareSquares);
+    axvector *buffer = axv.sizedNew(8);
     Square *s = square;
     int neighbours = 0;
 
