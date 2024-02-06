@@ -89,6 +89,7 @@ void gameOfLife(int w, int h, uint64_t updates) {
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texsq = IMG_LoadTexture(renderer, "square2.png");
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
     updatesPerSec = updates ? updates : (uint64_t) dm.refresh_rate;
     displayHz = dm.refresh_rate;
@@ -96,7 +97,6 @@ void gameOfLife(int w, int h, uint64_t updates) {
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), free);
 
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     manageTinyPool();
     Input *initZoom = axs.pop(tinyPool);        // generate artificial initial zoom-in
     initZoom->type = ZOOM;
