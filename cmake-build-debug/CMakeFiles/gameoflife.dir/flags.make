@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/usr/include/SDL2
 
-C_FLAGS = -g -std=gnu17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -O3
+C_FLAGS = -g -std=gnu17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -O0
 

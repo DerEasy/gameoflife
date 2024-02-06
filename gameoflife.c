@@ -143,9 +143,29 @@ static void update(void) {
 }
 
 
+// insertion sort the last n items into the vector (obvious pre-condition: rest of vector is sorted)
+static void insertionSortTail(axvector *v, long n) {
+    axvsnap s1 = axv.snapshot(v);
+    s1.i = axv.len(v) - n;
+    axvsnap s2 = axv.snapshot(v);
+    int (*cmp)(const void *, const void *) = axv.getComparator(v);
+
+    for (; s1.i < s1.len; ++s1.i) {
+        for (s2.i = s1.i; s2.i > 0; --s2.i) {
+            if (cmp(&s2.vec[s2.i], &s2.vec[s2.i - 1]) >= 0)
+                break;
+            void *tmp = s2.vec[s2.i];
+            s2.vec[s2.i] = s2.vec[s2.i - 1];
+            s2.vec[s2.i - 1] = tmp;
+        }
+    }
+}
+
+
 static bool determineWorthy(void *square, void *args) {
     axvector *alive = ((axvector **) args)[0];
     axvector *empty = ((axvector **) args)[1];
+    axvector *buffer = axv.setComparator(axv.sizedNew(8), compareSquares);
     Square *s = square;
     int neighbours = 0;
 
@@ -153,7 +173,7 @@ static bool determineWorthy(void *square, void *args) {
     //struct args_removeDuplicates argsrd = {axv.getComparator(empty), NULL};
     //axv.filter(axv.sort(empty), removeDuplicates, &argsrd);
     // this little shit hogs up 55,43% of cpu time
-    axv.sort(empty);
+    //axv.sort(empty);
     // should definitely consider using some inherently ordered data structure like rb-trees
 
     for (double offsetX = -1; offsetX <= +1; ++offsetX) {
@@ -169,11 +189,15 @@ static bool determineWorthy(void *square, void *args) {
                 manageTinyPool();
                 Square *inspectable = axs.pop(tinyPool);
                 *inspectable = ns;
-                axv.push(empty, inspectable);
+                axv.push(buffer, inspectable);
             }
         }
     }
 
+    long buflen = axv.len(buffer);
+    axv.extend(empty, buffer);
+    axv.destroy(buffer);
+    insertionSortTail(empty, buflen);
     if (neighbours == 2 || neighbours == 3)
         axv.push(alive, s);
 
