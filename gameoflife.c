@@ -252,7 +252,7 @@ static void processLife(void) {
     struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
     axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
     axv.foreach(squares, determineWorthy, (axvector *[2]) {alive, empty});
-    axv.filter(axv.sort(empty), keepSpawns, NULL);
+    axv.filter(empty, keepSpawns, NULL);
     axv.filter(squares, keepIdenticalSquares, axv.reverse(alive));
     axv.extend(squares, empty);
     axv.destroy(alive);
