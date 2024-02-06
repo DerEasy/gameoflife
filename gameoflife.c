@@ -219,31 +219,16 @@ static bool keepIdenticalSquares(const void *square, void *arg) {
 static void processLife(void) {
     struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
     axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
-
     axvector *alive = axv.new();
     axvector *empty = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     axv.foreach(squares, determineWorthy, (axvector *[2]) {alive, empty});
     axv.sort(empty);
-
-    /*puts("INITIAL ↓");
-    axv.map(squares, printSquare);
-    puts("ALIVE ↓");
-    axv.map(alive, printSquare);
-    puts("EMPTY ↓");
-    axv.map(empty, printSquare);*/
     axv.filter(empty, keepSpawns, NULL);
-    /*puts("REGENERATING ↓");
-    axv.map(empty, printSquare);*/
-
     axv.filter(squares, keepIdenticalSquares, &(void **) {axv.data(alive)});
     axv.destroy(alive);
     while (axv.len(empty))
         axv.push(squares, axv.pop(empty));
     axv.destroy(empty);
-
-    /*puts("RESULT ↓");
-    axv.map(squares, printSquare);
-    puts("-----------");*/
 }
 
 
