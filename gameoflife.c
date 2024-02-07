@@ -3,6 +3,8 @@
 //
 
 #include "gameoflife.h"
+#include "sdl_viewport.h"
+#include "square2_png.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -12,11 +14,8 @@
 #include <axstack.h>
 #include <SDL.h>
 #include <SDL_image.h>
-#include "sdl_viewport.h"
-#include "square2_png.h"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef enum InputType {
     ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE,
@@ -81,7 +80,7 @@ static Uint64 gamespeed;
 static bool paused;
 
 
-void gameOfLife(int w, int h, Uint64 updates) {
+void gameOfLife(int w, int h, unsigned updates) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE);
@@ -93,8 +92,8 @@ void gameOfLife(int w, int h, Uint64 updates) {
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), destructInput);
     tinyPool = axs.setDestructor(axs.new(), free);
-    gamespeed = updates ? updates : 6;
     updatesPerSec = dm.refresh_rate;
+    gamespeed = updates;
     zoom = 1. / (1 << 2);
     paused = true;
     defaultCamera = (DRect) {0, 0, 120, ((double) h / (double) w) * 120};   // display ratio in height

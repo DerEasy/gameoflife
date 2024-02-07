@@ -52,14 +52,14 @@ static struct IntTuple parseResolution(int argc, char **argv) {
 }
 
 
-static uint64_t parseUpdateRate(int argc, char **argv) {
-    uint64_t u = 0;
+static unsigned parseUpdateRate(int argc, char **argv) {
+    unsigned u = GOLdefaultUpdateRate;
     for (int i = 0; i < argc - 1; ++i) {
         if (!strcmp(argv[i], "-u")) {
             errno = 0;
-            u = (uint64_t) strtoull(argv[i + 1], NULL, 10);
+            u = (unsigned) strtoull(argv[i + 1], NULL, 10);
             if (errno != 0)
-                u = 0;
+                u = GOLdefaultUpdateRate;
         }
     }
     return u;
@@ -68,6 +68,6 @@ static uint64_t parseUpdateRate(int argc, char **argv) {
 
 int main(int argc, char **argv) {
     struct IntTuple res = parseResolution(argc - 1, argv + 1);
-    uint64_t updates = parseUpdateRate(argc - 1, argv + 1);
+    unsigned updates = parseUpdateRate(argc - 1, argv + 1);
     gameOfLife(res.w, res.h, updates);
 }

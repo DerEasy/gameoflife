@@ -5,11 +5,12 @@
 #ifndef GAMEOFLIFE_GAMEOFLIFE_H
 #define GAMEOFLIFE_GAMEOFLIFE_H
 
-#include <stdint.h>
+enum {
+    GOLdefaultWindowWidth = 1024,
+    GOLdefaultWindowHeight = 768,
+    GOLdefaultUpdateRate = 6
+};
 
-#define GOLdefaultWindowWidth 1024
-#define GOLdefaultWindowHeight 768
-
-void gameOfLife(int w, int h, uint64_t updates);
+void gameOfLife(int w, int h, unsigned updates);
 
 #endif //GAMEOFLIFE_GAMEOFLIFE_H
