@@ -11,6 +11,28 @@ enum {
     GOLdefaultUpdateRate = 6
 };
 
+/*
+ * Start an instance of the Game of Life.
+ * Supply custom window dimensions and an initial game tick rate or just use the defaults.
+ *
+ * Controls:
+ * ENTER / P                - Pause or resume the game. The game is paused at start.
+ * UP / W                   - Move camera up by one cell width.
+ * DOWN / S                 - Move camera down by one cell width.
+ * LEFT / A                 - Move camera left by one cell width.
+ * RIGHT / D                - Move camera right by one cell width.
+ * PLUS / WHEEL UP          - Zoom into the world.
+ * MINUS / WHEEL DOWN       - Zoom out of the world.
+ * LEFT CLICK               - Place a new cell in the world.
+ * RIGHT CLICK              - Remove an existing cell from the world.
+ * CLICK + DRAG             - Move camera in any direction with fine control.
+ * BACKSPACE                - Clear the world.
+ * Q                        - Decrease tick rate by 1; 10 when holding SHIFT, 100 when holding CTRL.
+ * E                        - Increase tick rate by 1; 10 when holding SHIFT, 100 when holding CTRL.
+ * B                        - Store a snapshot of the game state.
+ * R                        - Restore the most recently stored game state snapshot.
+ * ESCAPE                   - Exit game.
+ */
 void gameOfLife(int w, int h, unsigned updates);
 
 #endif //GAMEOFLIFE_GAMEOFLIFE_H
