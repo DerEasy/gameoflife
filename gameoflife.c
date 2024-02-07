@@ -19,7 +19,8 @@
 
 typedef enum InputType {
     ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE,
-    SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED, WINDOW_RESIZE
+    SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED, WINDOW_RESIZE,
+    BACKUP, RESTORE
 } InputType;
 
 typedef struct Square {
@@ -55,8 +56,10 @@ static void update(void);
 static void draw(void);
 static void destructSquare(void *);
 static void destructInput(void *);
+static void destructSnapshot(void *);
 static bool filterEqualSquares(const void *, void *);
 static bool removeDuplicates(const void *, void *);
+static void *mapNewSquares(void *);
 static int compareSquares(const void *, const void *);
 static void processInputs(void);
 static void processLife(void);
@@ -68,6 +71,7 @@ static SDL_Texture *texsq;
 static axstack *tinyPool;
 static axvector *squares;
 static axqueue *inputs;
+static axstack *snapshots;
 static DRect camera;
 static DRect defaultCamera;     // width is always the same, height is multiplied by display ratio
 static double zoom;
@@ -92,6 +96,7 @@ void gameOfLife(int w, int h, unsigned updates) {
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), destructInput);
     tinyPool = axs.setDestructor(axs.new(), free);
+    snapshots = axs.setDestructor(axs.new(), destructSnapshot);
     updatesPerSec = dm.refresh_rate;
     gamespeed = updates;
     zoom = 1. / (1 << 2);
@@ -101,6 +106,7 @@ void gameOfLife(int w, int h, unsigned updates) {
 
     while (tick());
 
+    axs.destroy(snapshots);
     axv.destroy(squares);
     axq.destroy(inputs);
     axs.destroy(tinyPool);
@@ -340,6 +346,17 @@ static void processInputs(void) {
             camera.h = defaultCamera.h * zoom;
             break;
         }
+        case BACKUP: {
+            axs.push(snapshots, axv.setDestructor(axv.map(axv.copy(squares), mapNewSquares), destructSquare));
+            break;
+        }
+        case RESTORE: {
+            if (axs.len(snapshots)) {
+                axv.destroy(squares);
+                squares = axs.pop(snapshots);
+            }
+            break;
+        }
         }
     }
 }
@@ -458,6 +475,18 @@ static bool handleEvents(void) {
                 axq.enqueue(inputs, input);
                 break;
             }
+            case SDLK_b: {
+                Input *input = getTinyMemory();
+                input->type = BACKUP;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_r: {
+                Input *input = getTinyMemory();
+                input->type = RESTORE;
+                axq.enqueue(inputs, input);
+                break;
+            }
             }
         }
 
@@ -549,6 +578,11 @@ static void destructInput(void *i) {
 }
 
 
+static void destructSnapshot(void *v) {
+    if (v) axv.destroy(v);
+}
+
+
 static int compareSquares(const void *a, const void *b) {
     const Square *s1 = *(Square **) a;
     const Square *s2 = *(Square **) b;
@@ -560,6 +594,14 @@ static int compareSquares(const void *a, const void *b) {
 
 static bool filterEqualSquares(const void *s, void *arg) {
     return compareSquares(&s, &arg);
+}
+
+
+static void *mapNewSquares(void *square) {
+    Square *s1 = square;
+    Square *s2 = getTinyMemory();
+    *s2 = *s1;
+    return s2;
 }
 
 
