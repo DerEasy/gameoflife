@@ -16,7 +16,7 @@ struct IntTuple {
 };
 
 static struct IntTuple parseResolution(int argc, char **argv) {
-    struct IntTuple res = {1024, 768};
+    struct IntTuple res = {GOLdefaultWindowWidth, GOLdefaultWindowHeight};
     enum States {SEARCHING, WIDTH, HEIGHT};
     enum States state = SEARCHING;
 

@@ -69,7 +69,7 @@ static axstack *tinyPool;
 static axvector *squares;
 static axqueue *inputs;
 static DRect camera;
-static DRect defaultCamera;
+static DRect defaultCamera;     // width is always the same, height is multiplied by display ratio
 static double zoom;
 static MouseTracker mouseleft;
 static MouseTracker mouseright;
@@ -91,7 +91,7 @@ void gameOfLife(int w, int h, Uint64 updates) {
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), destructInput);
     tinyPool = axs.setDestructor(axs.new(), free);
-    gamespeed = updates ? updates : 10;
+    gamespeed = updates ? updates : 6;
     updatesPerSec = dm.refresh_rate;
     zoom = 1. / (1 << 2);
     paused = true;
@@ -120,7 +120,7 @@ static bool tick(void) {
 
     Uint64 difftime = SDL_GetPerformanceCounter() - starttime;
     updateAccumulator += difftime;
-    tickTimeAccumulator += difftime;
+    tickTimeAccumulator += difftime * !paused;
     return true;
 }
 
@@ -261,20 +261,23 @@ static void processLife(void) {
 
 
 static void processInputs(void) {
+    int renW;   // width only because height is composite of width times display ratio
+    SDL_GetRendererOutputSize(renderer, &renW, NULL);
+
     for (Input *input; axq.len(inputs); axs.push(tinyPool, input)) {
         input = axq.dequeue(inputs);
 
         switch (input->type) {
         case CAMERA_VERTICAL: {
-            if (input->usedMouse)
-                camera.y += input->magnitude * zoom / 8;
+            if (input->usedMouse)   // 8.5 seems to be some magic number to get correct movement speed
+                camera.y += input->magnitude * zoom / 8.5 * ((double) GOLdefaultWindowWidth / renW);
             else
                 camera.y += input->magnitude;
             break;
         }
         case CAMERA_HORIZONTAL: {
             if (input->usedMouse)
-                camera.x += input->magnitude * zoom / 8;
+                camera.x += input->magnitude * zoom / 8.5 * ((double) GOLdefaultWindowWidth / renW);
             else
                 camera.x += input->magnitude;
             break;
