@@ -13,6 +13,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "sdl_viewport.h"
+#include "square2_png.h"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -85,7 +86,8 @@ void gameOfLife(int w, int h, Uint64 updates) {
 
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    texsq = IMG_LoadTexture(renderer, "square2.png");
+    SDL_RWops *embeddedTexture = SDL_RWFromConstMem(square2_png, sizeof square2_png);
+    texsq = IMG_LoadTexture_RW(renderer, embeddedTexture, true);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_DisplayMode dm; SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);

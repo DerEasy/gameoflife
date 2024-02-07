@@ -9,7 +9,8 @@ add_executable(gameoflife
         axqueue.c
         axstack.c
         gameoflife.c
-        sdl_viewport.c)
+        sdl_viewport.c
+        square2_png.c)
 
 target_include_directories(gameoflife PRIVATE /usr/include/SDL2)
 

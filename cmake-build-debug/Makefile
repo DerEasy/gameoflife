@@ -273,6 +273,30 @@ sdl_viewport.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/sdl_viewport.c.s
 .PHONY : sdl_viewport.c.s
 
+square2_png.o: square2_png.c.o
+.PHONY : square2_png.o
+
+# target to build an object file
+square2_png.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.o
+.PHONY : square2_png.c.o
+
+square2_png.i: square2_png.c.i
+.PHONY : square2_png.i
+
+# target to preprocess a source file
+square2_png.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.i
+.PHONY : square2_png.c.i
+
+square2_png.s: square2_png.c.s
+.PHONY : square2_png.s
+
+# target to generate assembly for a file
+square2_png.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.s
+.PHONY : square2_png.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -300,6 +324,9 @@ help:
 	@echo "... sdl_viewport.o"
 	@echo "... sdl_viewport.i"
 	@echo "... sdl_viewport.s"
+	@echo "... square2_png.o"
+	@echo "... square2_png.i"
+	@echo "... square2_png.s"
 .PHONY : help
 
 
