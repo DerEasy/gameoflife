@@ -174,13 +174,6 @@ static bool determineWorthy(void *square, void *args) {
     long taillen = 0;
     int neighbours = 0;
 
-    // removing duplicates is almost as bad as just doing linear search
-    //struct args_removeDuplicates argsrd = {axv.getComparator(potentials), NULL};
-    //axv.filter(axv.sort(potentials), removeDuplicates, &argsrd);
-    // this little shit hogs up 55,43% of cpu time
-    //axv.sort(potentials);
-    // should definitely consider using some inherently ordered data structure like rb-trees
-
     for (double offsetX = -1; offsetX <= +1; ++offsetX) {
         for (double offsetY = -1; offsetY <= +1; ++offsetY) {
             if (offsetX == 0 && offsetY == 0)
