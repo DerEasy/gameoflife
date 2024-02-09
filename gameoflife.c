@@ -233,12 +233,9 @@ static bool determineSpawning(const void *square, void *_) {
 }
 
 
-static bool keepIdenticalSquares(const void *square, void *arg) {
-    const Square *s = square;
-    axvector *alive = arg;
-
-    if (s == axv.top(alive)) {
-        axv.pop(alive);
+static bool keepIdenticalSquares(const void *square, void *survivors) {
+    if (square == axv.top(survivors)) {
+        axv.pop(survivors);
         return true;
     } else {
         return false;
