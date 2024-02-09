@@ -340,7 +340,7 @@ static void processInputs(void) {
             break;
         }
         case BACKUP: {
-            axs.push(snapshots, axv.setDestructor(axv.map(axv.copy(squares), mapNewSquares), destructSquare));
+            axs.push(snapshots, axv.setDestructor(axv.map(axv.copy(squares), mapNewSquares), axv.getDestructor(squares)));
             break;
         }
         case RESTORE: {
