@@ -4,7 +4,8 @@
 
 #include "gameoflife.h"
 #include "sdl_viewport.h"
-#include "square2_png.h"
+#include "square0_png.h"
+#include "square1_png.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -20,7 +21,7 @@
 typedef enum InputType {
     ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE,
     SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED, WINDOW_RESIZE,
-    BACKUP, RESTORE
+    BACKUP, RESTORE, TEXTURE
 } InputType;
 
 typedef struct Square {
@@ -67,7 +68,8 @@ static void processLife(void);
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-static SDL_Texture *texsq;
+static SDL_Texture *textures[2];
+static SDL_Texture *chosenTexture;
 static axstack *tinyPool;
 static axvector *squares;
 static axqueue *inputs;
@@ -89,8 +91,11 @@ void gameOfLife(int w, int h, unsigned updates) {
 
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_RWops *embeddedTexture = SDL_RWFromConstMem(square2_png, sizeof square2_png);
-    texsq = IMG_LoadTexture_RW(renderer, embeddedTexture, true);
+    SDL_RWops *embeddedTexture = SDL_RWFromConstMem(square0_png, sizeof square0_png);
+    textures[0] = IMG_LoadTexture_RW(renderer, embeddedTexture, true);
+    embeddedTexture = SDL_RWFromConstMem(square1_png, sizeof square1_png);
+    textures[1] = IMG_LoadTexture_RW(renderer, embeddedTexture, true);
+    chosenTexture = *textures;
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_DisplayMode dm; SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
     squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
@@ -110,7 +115,8 @@ void gameOfLife(int w, int h, unsigned updates) {
     axv.destroy(squares);
     axq.destroy(inputs);
     axs.destroy(tinyPool);
-    SDL_DestroyTexture(texsq);
+    SDL_DestroyTexture(textures[0]);
+    SDL_DestroyTexture(textures[1]);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -347,6 +353,10 @@ static void processInputs(void) {
             }
             break;
         }
+        case TEXTURE: {
+            chosenTexture = textures[input->x];
+            break;
+        }
         }
     }
 }
@@ -368,7 +378,7 @@ static void draw(void) {
         pos.y = square->y;
         if (sdl_inViewport(&camera, &pos)) {
             sdl_getViewportDstFRect(&camera, &pos, &vdst, &dst);
-            SDL_RenderCopyF(renderer, texsq, NULL, &dst);
+            SDL_RenderCopyF(renderer, chosenTexture, NULL, &dst);
         }
     }
 
@@ -474,6 +484,22 @@ static bool handleEvents(void) {
             case SDLK_r: {
                 Input *input = getTinyMemory();
                 input->type = RESTORE;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_KP_1:
+            case SDLK_1: {
+                Input *input = getTinyMemory();
+                input->type = TEXTURE;
+                input->x = 0;
+                axq.enqueue(inputs, input);
+                break;
+            }
+            case SDLK_KP_2:
+            case SDLK_2: {
+                Input *input = getTinyMemory();
+                input->type = TEXTURE;
+                input->x = 1;
                 axq.enqueue(inputs, input);
                 break;
             }

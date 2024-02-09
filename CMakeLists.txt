@@ -10,7 +10,8 @@ add_executable(gameoflife
         axstack.c
         gameoflife.c
         sdl_viewport.c
-        square2_png.c)
+        square0_png.c
+        square1_png.c)
 
 target_include_directories(gameoflife PRIVATE /usr/include/SDL2)
 

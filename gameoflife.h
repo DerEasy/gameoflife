@@ -31,6 +31,7 @@ enum {
  * E                        - Increase tick rate by 1; 10 when holding SHIFT, 100 when holding CTRL.
  * B                        - Store a snapshot of the game state.
  * R                        - Restore the most recently stored game state snapshot.
+ * Number keys              - Switch between available cell textures.
  * ESCAPE                   - Exit game.
  */
 void gameOfLife(int w, int h, unsigned updates);
