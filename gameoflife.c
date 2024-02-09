@@ -269,7 +269,7 @@ static void processInputs(void) {
 
         switch (input->type) {
         case CAMERA_VERTICAL: {
-            if (input->usedMouse)   // 8.5 seems to be some magic number to get correct movement speed
+            if (input->usedMouse)   // 8.5 seems to be some kind of magic number to get correct movement speed
                 camera.y += input->magnitude * zoom / 8.5 * ((double) GOLdefaultWindowWidth / renW);
             else
                 camera.y += input->magnitude;
@@ -283,33 +283,26 @@ static void processInputs(void) {
             break;
         }
         case ZOOM: {
-            double resetZoom = zoom;
-            double resetW = camera.w;
-            double resetH = camera.h;
-            zoom -= input->magnitude * (1. / (1 << 6));
-            camera.w = defaultCamera.w * zoom;
-            camera.h = defaultCamera.h * zoom;
-            if (camera.w == 0 || camera.h == 0) {
-                zoom = resetZoom;
-                camera.w = resetW;
-                camera.h = resetH;
+            double zoomDiff = input->magnitude * (1. / (1 << 6));
+            if (zoom - zoomDiff > 0) {
+                zoom -= zoomDiff;
+                camera.x += zoomDiff * defaultCamera.w / 2;
+                camera.y += zoomDiff * defaultCamera.h / 2;
+                camera.w = defaultCamera.w * zoom;
+                camera.h = defaultCamera.h * zoom;
             }
             break;
         }
         case SQUARE_PLACE: {
             Square *square = getTinyMemory();
-            int rw;
-            SDL_GetRendererOutputSize(renderer, &rw, NULL);
-            double ratio = rw / camera.w;
+            double ratio = renW / camera.w;
             square->x = floor(camera.x + (double) input->x / ratio);
             square->y = floor(camera.y + (double) input->y / ratio);
             axv.push(squares, square);
             break;
         }
         case SQUARE_DELETE: {
-            int rw;
-            SDL_GetRendererOutputSize(renderer, &rw, NULL);
-            double cameraRatio = rw / camera.w;
+            double cameraRatio = renW / camera.w;
             Square square = {
                     floor(camera.x + (double) input->x / cameraRatio),
                     floor(camera.y + (double) input->y / cameraRatio)
