@@ -273,29 +273,53 @@ sdl_viewport.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/sdl_viewport.c.s
 .PHONY : sdl_viewport.c.s
 
-square2_png.o: square2_png.c.o
-.PHONY : square2_png.o
+square0_png.o: square0_png.c.o
+.PHONY : square0_png.o
 
 # target to build an object file
-square2_png.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.o
-.PHONY : square2_png.c.o
+square0_png.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square0_png.c.o
+.PHONY : square0_png.c.o
 
-square2_png.i: square2_png.c.i
-.PHONY : square2_png.i
+square0_png.i: square0_png.c.i
+.PHONY : square0_png.i
 
 # target to preprocess a source file
-square2_png.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.i
-.PHONY : square2_png.c.i
+square0_png.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square0_png.c.i
+.PHONY : square0_png.c.i
 
-square2_png.s: square2_png.c.s
-.PHONY : square2_png.s
+square0_png.s: square0_png.c.s
+.PHONY : square0_png.s
 
 # target to generate assembly for a file
-square2_png.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square2_png.c.s
-.PHONY : square2_png.c.s
+square0_png.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square0_png.c.s
+.PHONY : square0_png.c.s
+
+square1_png.o: square1_png.c.o
+.PHONY : square1_png.o
+
+# target to build an object file
+square1_png.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square1_png.c.o
+.PHONY : square1_png.c.o
+
+square1_png.i: square1_png.c.i
+.PHONY : square1_png.i
+
+# target to preprocess a source file
+square1_png.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square1_png.c.i
+.PHONY : square1_png.c.i
+
+square1_png.s: square1_png.c.s
+.PHONY : square1_png.s
+
+# target to generate assembly for a file
+square1_png.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gameoflife.dir/build.make CMakeFiles/gameoflife.dir/square1_png.c.s
+.PHONY : square1_png.c.s
 
 # Help Target
 help:
@@ -324,9 +348,12 @@ help:
 	@echo "... sdl_viewport.o"
 	@echo "... sdl_viewport.i"
 	@echo "... sdl_viewport.s"
-	@echo "... square2_png.o"
-	@echo "... square2_png.i"
-	@echo "... square2_png.s"
+	@echo "... square0_png.o"
+	@echo "... square0_png.i"
+	@echo "... square0_png.s"
+	@echo "... square1_png.o"
+	@echo "... square1_png.i"
+	@echo "... square1_png.s"
 .PHONY : help
 
 
