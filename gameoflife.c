@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <math.h>
 #include <axvector.h>
 #include <axqueue.h>
@@ -106,7 +107,7 @@ void gameOfLife(int w, int h, unsigned tickrate_, struct GOL_Pattern patinfo) {
     snapshots = axs.setDestructor(axs.new(), destructSnapshot);
     updatesPerSec = dm.refresh_rate;
     tickrate = tickrate_;
-    zoom = 1. / (1 << (2 - !!patinfo.pattern));
+    zoom = 1. / (1 << 2);
     paused = true;
     defaultCamera = (DRect) {0, 0, 120, ((double) h / (double) w) * 120};   // display ratio in height
     camera = (DRect) {0, 0, defaultCamera.w * zoom, defaultCamera.h * zoom};
@@ -679,5 +680,62 @@ static void loadPlaintextPattern(const char *s) {
 
 
 static void loadRLEPattern(const char *s) {
+    while (*s && *s == '#') {
+        while (*s && *s != '\n')
+            ++s;
+        s += !!*s;
+    }
 
+    Uint64 w = 0, h = 0;
+    for (Uint64 *fill = &w; *s; ++s) {
+        if (*s == '\n')
+            break;
+        if (!isdigit(*s))
+            continue;
+
+        errno = 0;
+        char *tmp;
+        *fill = strtoull(s, &tmp, 10);
+        if (errno) return;
+        s = tmp - 1;
+        if (fill == &h) break;
+        fill = &h;
+    }
+
+    enum States {COUNT, TAG};
+    enum States state = COUNT;
+    for (Sint64 x = 0, y = 0, count = 0; *s && *s != '!'; ++s) {
+        if (isspace(*s))
+            continue;
+
+        if (state == COUNT) {
+            if (isdigit(*s)) {
+                int digit = *s - '0';
+                count = count * 10 + digit;
+            } else {
+                count += !count;
+                state = TAG;
+                --s;
+            }
+        }
+
+        else /*if (state == TAG)*/ {
+            if (*s == 'b') {
+                x += count;
+            } else if (*s == '$') {
+                x = 0;
+                y += count;
+            } else if (*s == 'o') {
+                while (count--) {
+                    Square *square = getTinyMemory();
+                    square->x = (double) x++;
+                    square->y = (double) y;
+                    axv.push(squares, square);
+                }
+            }
+
+            count = 0;
+            state = COUNT;
+        }
+    }
 }

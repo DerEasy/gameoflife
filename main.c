@@ -77,6 +77,9 @@ static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-r")) {
             filename = argv[i + 1];
             p.type = GOL_RLE;
+        } else if (!strcmp(argv[i], "-f")) {
+            filename = argv[i + 1];
+            p.type = GOL_INDETERMINATE;
         }
     }
 
@@ -93,6 +96,16 @@ static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
     size_t tmp = fread(pattern, 1, size, f); (void) tmp;
     pattern[size] = '\0';
     fclose(f);
+
+    if (p.type == GOL_INDETERMINATE) {
+        char *ending = strrchr(filename, '.');
+        if (ending) {
+            if (!strcmp(ending, ".cells"))
+                p.type = GOL_PLAINTEXT;
+            else if (!strcmp(ending, ".rle"))
+                p.type = GOL_RLE;
+        }
+    }
 
     p.pattern = pattern;
     p.freeString = true;

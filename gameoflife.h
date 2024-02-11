@@ -16,7 +16,8 @@ enum {
 enum GOL_PatternType {
     GOL_NOTYPE,
     GOL_PLAINTEXT,
-    GOL_RLE
+    GOL_RLE,
+    GOL_INDETERMINATE
 };
 
 struct GOL_Pattern {
