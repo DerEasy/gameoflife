@@ -687,9 +687,7 @@ static void loadRLEPattern(const char *s) {
     }
 
     Uint64 w = 0, h = 0;
-    for (Uint64 *fill = &w; *s; ++s) {
-        if (*s == '\n')
-            break;
+    for (Uint64 *fill = &w; *s && *s != '\n'; ++s) {
         if (!isdigit(*s))
             continue;
 
@@ -701,6 +699,8 @@ static void loadRLEPattern(const char *s) {
         if (fill == &h) break;
         fill = &h;
     }
+
+    while (*s != '\n') ++s;
 
     enum States {COUNT, TAG};
     enum States state = COUNT;
