@@ -5,15 +5,30 @@
 #ifndef GAMEOFLIFE_GAMEOFLIFE_H
 #define GAMEOFLIFE_GAMEOFLIFE_H
 
+#include <stdbool.h>
+
 enum {
-    GOLdefaultWindowWidth = 1024,
-    GOLdefaultWindowHeight = 768,
-    GOLdefaultUpdateRate = 6
+    GOL_defaultWindowWidth = 1024,
+    GOL_defaultWindowHeight = 768,
+    GOL_defaultTickRate = 6
+};
+
+enum GOL_PatternType {
+    GOL_NOTYPE,
+    GOL_PLAINTEXT,
+    GOL_RLE
+};
+
+struct GOL_Pattern {
+    const char *pattern;
+    enum GOL_PatternType type;
+    bool freeString;
 };
 
 /*
  * Start an instance of the Game of Life.
  * Supply custom window dimensions and an initial game tick rate or just use the defaults.
+ * You may pass a pattern or set it to NULL if no pattern shall be loaded.
  *
  * Controls:
  * ENTER / P                - Pause or resume the game. The game is paused at start.
@@ -34,6 +49,6 @@ enum {
  * Number keys              - Switch between available cell textures.
  * ESCAPE                   - Exit game.
  */
-void gameOfLife(int w, int h, unsigned updates);
+void gameOfLife(int w, int h, unsigned tickrate, struct GOL_Pattern patinfo);
 
 #endif //GAMEOFLIFE_GAMEOFLIFE_H

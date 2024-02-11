@@ -1,6 +1,7 @@
 #include "gameoflife.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <errno.h>
 
 /*
@@ -16,7 +17,7 @@ struct IntTuple {
 };
 
 static struct IntTuple parseResolution(int argc, char **argv) {
-    struct IntTuple res = {GOLdefaultWindowWidth, GOLdefaultWindowHeight};
+    struct IntTuple res = {GOL_defaultWindowWidth, GOL_defaultWindowHeight};
     enum States {SEARCHING, WIDTH, HEIGHT};
     enum States state = SEARCHING;
 
@@ -53,21 +54,55 @@ static struct IntTuple parseResolution(int argc, char **argv) {
 
 
 static unsigned parseUpdateRate(int argc, char **argv) {
-    unsigned u = GOLdefaultUpdateRate;
+    unsigned u = GOL_defaultTickRate;
     for (int i = 0; i < argc - 1; ++i) {
         if (!strcmp(argv[i], "-u")) {
             errno = 0;
             u = (unsigned) strtoull(argv[i + 1], NULL, 10);
             if (errno != 0)
-                u = GOLdefaultUpdateRate;
+                u = GOL_defaultTickRate;
         }
     }
     return u;
 }
 
 
+static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
+    struct GOL_Pattern p = {NULL, GOL_NOTYPE, false};
+    char *filename = NULL;
+    for (int i = 0; i < argc - 1; ++i) {
+        if (!strcmp(argv[i], "-p")) {
+            filename = argv[i + 1];
+            p.type = GOL_PLAINTEXT;
+        } else if (!strcmp(argv[i], "-r")) {
+            filename = argv[i + 1];
+            p.type = GOL_RLE;
+        }
+    }
+
+    if (!filename) return p;
+    FILE *f = fopen(filename, "r");
+    if (!f) return p;
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    rewind(f);
+
+    char *pattern = malloc(size + 1);
+    if (!pattern) return p;
+    size_t tmp = fread(pattern, 1, size, f); (void) tmp;
+    pattern[size] = '\0';
+    fclose(f);
+
+    p.pattern = pattern;
+    p.freeString = true;
+    return p;
+}
+
+
 int main(int argc, char **argv) {
     struct IntTuple res = parseResolution(argc - 1, argv + 1);
     unsigned updates = parseUpdateRate(argc - 1, argv + 1);
-    gameOfLife(res.w, res.h, updates);
+    struct GOL_Pattern patinfo = parsePatternToLoad(argc - 1, argv + 1);
+    gameOfLife(res.w, res.h, updates, patinfo);
 }

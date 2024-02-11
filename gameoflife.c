@@ -20,7 +20,7 @@
 
 typedef enum InputType {
     ZOOM, CAMERA_VERTICAL, CAMERA_HORIZONTAL, SQUARE_PLACE,
-    SQUARE_DELETE, PAUSE, GENOCIDE, GAMESPEED, WINDOW_RESIZE,
+    SQUARE_DELETE, PAUSE, GENOCIDE, TICKRATE, WINDOW_RESIZE,
     BACKUP, RESTORE, TEXTURE
 } InputType;
 
@@ -64,6 +64,8 @@ static void *mapNewSquares(void *);
 static int compareSquares(const void *, const void *);
 static void processInputs(void);
 static void processLife(void);
+static void loadPlaintextPattern(const char *);
+static void loadRLEPattern(const char *);
 
 
 static SDL_Window *window;
@@ -82,11 +84,11 @@ static MouseTracker mouseright;
 static Uint64 updateAccumulator;
 static Uint64 tickTimeAccumulator;
 static Uint64 updatesPerSec;
-static Uint64 gamespeed;
+static Uint64 tickrate;
 static bool paused;
 
 
-void gameOfLife(int w, int h, unsigned updates) {
+void gameOfLife(int w, int h, unsigned tickrate_, struct GOL_Pattern patinfo) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
     window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE);
@@ -103,11 +105,20 @@ void gameOfLife(int w, int h, unsigned updates) {
     tinyPool = axs.setDestructor(axs.new(), free);
     snapshots = axs.setDestructor(axs.new(), destructSnapshot);
     updatesPerSec = dm.refresh_rate;
-    gamespeed = updates;
-    zoom = 1. / (1 << 2);
+    tickrate = tickrate_;
+    zoom = 1. / (1 << (2 - !!patinfo.pattern));
     paused = true;
     defaultCamera = (DRect) {0, 0, 120, ((double) h / (double) w) * 120};   // display ratio in height
     camera = (DRect) {0, 0, defaultCamera.w * zoom, defaultCamera.h * zoom};
+
+    if (patinfo.pattern) {
+        if (patinfo.type == GOL_PLAINTEXT)
+            loadPlaintextPattern(patinfo.pattern);
+        if (patinfo.type == GOL_RLE)
+            loadRLEPattern(patinfo.pattern);
+        if (patinfo.freeString)
+            free((void *) patinfo.pattern);
+    }
 
     while (tick());
 
@@ -140,7 +151,7 @@ static bool tick(void) {
 
 static void update(void) {
     const Uint64 updateDuration = SDL_GetPerformanceFrequency() / updatesPerSec;
-    const Uint64 gametickDuration = SDL_GetPerformanceFrequency() / gamespeed;
+    const Uint64 gametickDuration = SDL_GetPerformanceFrequency() / tickrate;
 
     processInputs();
     if (updateAccumulator >= updateDuration) {
@@ -273,20 +284,26 @@ static void processInputs(void) {
         switch (input->type) {
         case CAMERA_VERTICAL: {
             if (input->usedMouse)   // 8.5 seems to be some kind of magic number to get correct movement speed
-                camera.y += input->magnitude * zoom / 8.5 * ((double) GOLdefaultWindowWidth / renW);
+                camera.y += input->magnitude * zoom / 8.5 * ((double) GOL_defaultWindowWidth / renW);
             else
                 camera.y += input->magnitude;
             break;
         }
         case CAMERA_HORIZONTAL: {
             if (input->usedMouse)
-                camera.x += input->magnitude * zoom / 8.5 * ((double) GOLdefaultWindowWidth / renW);
+                camera.x += input->magnitude * zoom / 8.5 * ((double) GOL_defaultWindowWidth / renW);
             else
                 camera.x += input->magnitude;
             break;
         }
         case ZOOM: {
-            double zoomDiff = input->magnitude * (1. / (1 << 6));
+            SDL_Keymod mod = SDL_GetModState();
+            double zoomDiff;
+            if (mod & KMOD_CTRL)
+                zoomDiff = input->magnitude * (1. / (1 << 2));
+            else
+                zoomDiff = input->magnitude * (1. / (1 << 6));
+
             if (zoom - zoomDiff > 0) {
                 zoom -= zoomDiff;
                 camera.x += zoomDiff * defaultCamera.w / 2;
@@ -321,16 +338,16 @@ static void processInputs(void) {
             axv.clear(squares);
             break;
         }
-        case GAMESPEED: {
+        case TICKRATE: {
             SDL_Keymod mod = SDL_GetModState();
             Sint64 speedOffset = (Sint64) input->magnitude;
             if (mod & KMOD_CTRL)
                 speedOffset *= 100;
             else if (mod & KMOD_SHIFT)
                 speedOffset *= 10;
-            gamespeed += speedOffset;
-            if ((Sint64) gamespeed < 1)
-                gamespeed = 1;
+            tickrate += speedOffset;
+            if ((Sint64) tickrate < 1)
+                tickrate = 1;
             break;
         }
         case WINDOW_RESIZE: {
@@ -463,14 +480,14 @@ static bool handleEvents(void) {
             }
             case SDLK_q: {
                 Input *input = getTinyMemory();
-                input->type = GAMESPEED;
+                input->type = TICKRATE;
                 input->magnitude = -1;
                 axq.enqueue(inputs, input);
                 break;
             }
             case SDLK_e: {
                 Input *input = getTinyMemory();
-                input->type = GAMESPEED;
+                input->type = TICKRATE;
                 input->magnitude = 1;
                 axq.enqueue(inputs, input);
                 break;
@@ -631,4 +648,36 @@ static bool removeDuplicates(const void *current, void *args_) {
         args->origin = (void *) current;
         return true;
     }
+}
+
+
+static void loadPlaintextPattern(const char *s) {
+    while (*s && *s == '!') {
+        while (*s && *s != '\n')
+            ++s;
+        s += !!*s;
+    }
+
+    for (Sint64 x = 0, y = 0; *s; ++s, ++x) {
+        if (*s == '.')
+            continue;
+        if (*s == '\r')
+            continue;
+        if (*s == '\n') {
+            x = -1;
+            ++y;
+            continue;
+        }
+        if (*s == 'O') {
+            Square *square = getTinyMemory();
+            square->x = (double) x;
+            square->y = (double) y;
+            axv.push(squares, square);
+        }
+    }
+}
+
+
+static void loadRLEPattern(const char *s) {
+
 }
