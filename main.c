@@ -56,7 +56,7 @@ static struct IntTuple parseResolution(int argc, char **argv) {
 static unsigned parseUpdateRate(int argc, char **argv) {
     unsigned u = GOL_defaultTickRate;
     for (int i = 0; i < argc - 1; ++i) {
-        if (!strcmp(argv[i], "-u")) {
+        if (!strcmp(argv[i], "-t")) {
             errno = 0;
             u = (unsigned) strtoull(argv[i + 1], NULL, 10);
             if (errno != 0)
@@ -113,7 +113,56 @@ static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
 }
 
 
+static bool showHelp(int argc, char **argv) {
+    for (int i = 0; i < argc; ++i) {
+        if (!strcmp(argv[i], "-h"))
+            goto help;
+        if (!strcmp(argv[i], "--help"))
+            goto help;
+    }
+
+    return false;
+help:
+    puts(
+        "The Game of Life - famous turing-complete cellular automaton zero-player game\n"
+        "\n"
+        "Options:\n"
+        "    -h, --help       - Display this help screen.\n"
+        "    -w               - Set initial window width.\n"
+        "    -h               - Set initial window height.\n"
+        "    -t               - Set initial game tick rate.\n"
+        "    -p               - Load plaintext pattern file.\n"
+        "    -r               - Load RLE pattern file.\n"
+        "    -f               - Load pattern file. Type determined by file extension.\n"
+        "Any option may override previous options.\n"
+        "\n"
+        "\n"
+        "Controls:\n"
+        "    ENTER / P                - Pause or resume the game. The game is paused at start.\n"
+        "    UP / W                   - Move camera up by one cell width.\n"
+        "    DOWN / S                 - Move camera down by one cell width.\n"
+        "    LEFT / A                 - Move camera left by one cell width.\n"
+        "    RIGHT / D                - Move camera right by one cell width.\n"
+        "    PLUS / WHEEL UP          - Zoom into the world. Hold CTRL to accelerate.\n"
+        "    MINUS / WHEEL DOWN       - Zoom out of the world. Hold CTRL to accelerate.\n"
+        "    LEFT CLICK               - Place a new cell in the world.\n"
+        "    RIGHT CLICK              - Remove an existing cell from the world.\n"
+        "    CLICK + DRAG             - Move camera in any direction with fine control.\n"
+        "    BACKSPACE                - Clear the world.\n"
+        "    Q                        - Decrease tick rate by 1; 10 when holding SHIFT, 100 when holding CTRL.\n"
+        "    E                        - Increase tick rate by 1; 10 when holding SHIFT, 100 when holding CTRL.\n"
+        "    B                        - Store a snapshot of the game state.\n"
+        "    R                        - Restore the most recently stored game state snapshot.\n"
+        "    Number keys              - Switch between available cell textures.\n"
+        "    ESCAPE                   - Exit game."
+    );
+    return true;
+}
+
+
 int main(int argc, char **argv) {
+    if (showHelp(argc - 1, argv + 1))
+        return 0;
     struct IntTuple res = parseResolution(argc - 1, argv + 1);
     unsigned updates = parseUpdateRate(argc - 1, argv + 1);
     struct GOL_Pattern patinfo = parsePatternToLoad(argc - 1, argv + 1);

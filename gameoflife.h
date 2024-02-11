@@ -37,8 +37,8 @@ struct GOL_Pattern {
  * DOWN / S                 - Move camera down by one cell width.
  * LEFT / A                 - Move camera left by one cell width.
  * RIGHT / D                - Move camera right by one cell width.
- * PLUS / WHEEL UP          - Zoom into the world.
- * MINUS / WHEEL DOWN       - Zoom out of the world.
+ * PLUS / WHEEL UP          - Zoom into the world. Hold CTRL to accelerate.
+ * MINUS / WHEEL DOWN       - Zoom out of the world. Hold CTRL to accelerate.
  * LEFT CLICK               - Place a new cell in the world.
  * RIGHT CLICK              - Remove an existing cell from the world.
  * CLICK + DRAG             - Move camera in any direction with fine control.
