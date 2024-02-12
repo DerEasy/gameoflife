@@ -68,13 +68,13 @@ static unsigned parseUpdateRate(int argc, char **argv) {
 
 
 static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
-    struct GOL_Pattern p = {NULL, GOL_NOTYPE, false};
+    struct GOL_Pattern p = {0};
     char *filename = NULL;
     for (int i = 0; i < argc - 1; ++i) {
-        if (!strcmp(argv[i], "-p")) {
+        if (!strcmp(argv[i], "-fp")) {
             filename = argv[i + 1];
             p.type = GOL_PLAINTEXT;
-        } else if (!strcmp(argv[i], "-r")) {
+        } else if (!strcmp(argv[i], "-fr")) {
             filename = argv[i + 1];
             p.type = GOL_RLE;
         } else if (!strcmp(argv[i], "-f")) {
@@ -108,8 +108,18 @@ static struct GOL_Pattern parsePatternToLoad(int argc, char **argv) {
     }
 
     p.pattern = pattern;
-    p.freeString = true;
+    p.freePattern = true;
     return p;
+}
+
+
+static const char *parseRulestringToLoad(int argc, char **argv) {
+    const char *rules = NULL;
+    for (int i = 0; i < argc - 1; ++i) {
+        if (!strcmp(argv[i], "-r"))
+            rules = argv[i + 1];
+    }
+    return rules;
 }
 
 
@@ -131,10 +141,10 @@ help:
         "    -w               - Set initial window width.\n"
         "    -h               - Set initial window height.\n"
         "    -t               - Set initial game tick rate.\n"
-        "    -p               - Load plaintext pattern file.\n"
-        "    -r               - Load RLE pattern file.\n"
+        "    -fp              - Load plaintext pattern file.\n"
+        "    -fr              - Load RLE pattern file.\n"
         "    -f               - Load pattern file. Type determined by file extension.\n"
-        "Any option may override previous options.\n"
+        "Any option may override previous options. All options and their parameters are space-separated.\n"
         "\n"
         "\n"
         "Controls:\n"
@@ -166,5 +176,6 @@ int main(int argc, char **argv) {
     struct IntTuple res = parseResolution(argc - 1, argv + 1);
     unsigned updates = parseUpdateRate(argc - 1, argv + 1);
     struct GOL_Pattern patinfo = parsePatternToLoad(argc - 1, argv + 1);
+    patinfo.rules = parseRulestringToLoad(argc - 1, argv + 1);
     gameOfLife(res.w, res.h, updates, patinfo);
 }

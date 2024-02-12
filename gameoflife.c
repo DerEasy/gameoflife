@@ -44,6 +44,16 @@ typedef struct MouseTracker {
     int xDown, yDown;
 } MouseTracker;
 
+struct SingleRule {
+    Uint8 nums[8];
+    Uint8 len;
+    bool isRange;
+};
+
+typedef struct Rules {
+    struct SingleRule birth, survival;
+} Rules;
+
 // set origin to NULL before calling filter with removeDuplicates()
 struct args_removeDuplicates {
     int (*comp)(const void *, const void *);
@@ -66,13 +76,15 @@ static int compareSquares(const void *, const void *);
 static void processInputs(void);
 static void processLife(void);
 static void loadPlaintextPattern(const char *);
-static void loadRLEPattern(const char *);
+static char *loadRLEPattern(const char *);
+static Rules parseRulestring(const char *);
 
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *textures[2];
 static SDL_Texture *chosenTexture;
+static Rules rules;
 static axstack *tinyPool;
 static axvector *squares;
 static axqueue *inputs;
@@ -115,11 +127,21 @@ void gameOfLife(int w, int h, unsigned tickrate_, struct GOL_Pattern patinfo) {
     if (patinfo.pattern) {
         if (patinfo.type == GOL_PLAINTEXT)
             loadPlaintextPattern(patinfo.pattern);
-        if (patinfo.type == GOL_RLE)
-            loadRLEPattern(patinfo.pattern);
-        if (patinfo.freeString)
-            free((void *) patinfo.pattern);
+        if (patinfo.type == GOL_RLE) {
+            char *rulestring = loadRLEPattern(patinfo.pattern);
+            if (!patinfo.rules) {
+                patinfo.rules = rulestring;
+                patinfo.freeRulestring = true;
+            }
+            else free(rulestring);
+        }
     }
+
+    rules = parseRulestring(patinfo.rules ? patinfo.rules : "B3/S23");
+    if (patinfo.freeRulestring)
+        free((void *) patinfo.rules);
+    if (patinfo.freePattern)
+        free((void *) patinfo.pattern);
 
     while (tick());
 
@@ -171,7 +193,7 @@ static void update(void) {
 
 
 // insertion sort the last n items into the vector (obvious pre-condition: rest of vector is sorted)
-static void insertionSortTail(axvector *v, long n) {
+static void insertionSortTail(axvector *v, int n) {
     if (n <= 0)
         return;
 
@@ -196,8 +218,8 @@ static bool determineWorthy(void *square, void *args) {
     axvector *survivors = ((axvector **) args)[0];
     axvector *potentials = ((axvector **) args)[1];
     Square *s = square;
-    long taillen = 0;
-    int neighbours = 0;
+    int taillen = 0;
+    Uint8 neighbours = 0;
 
     for (double offsetX = -1; offsetX <= +1; ++offsetX) {
         for (double offsetY = -1; offsetY <= +1; ++offsetY) {
@@ -221,8 +243,13 @@ static bool determineWorthy(void *square, void *args) {
     // calling axv.sort(potentials) every damn time this function is called (which is a lot!)
     insertionSortTail(potentials, taillen);
 
-    if (neighbours == 2 || neighbours == 3)
-        axv.push(survivors, s);
+    if (rules.survival.isRange) {
+        if (rules.survival.nums[0] <= neighbours && neighbours <= rules.survival.nums[1])
+            axv.push(survivors, s);
+    } else {
+        if (memchr(rules.survival.nums, neighbours, sizeof rules.survival.nums))
+            axv.push(survivors, s);
+    }
 
     return true;
 }
@@ -231,7 +258,7 @@ static bool determineWorthy(void *square, void *args) {
 static bool determineSpawning(const void *square, void *_) {
     (void) _;
     const Square *s = square;
-    int neighbours = 0;
+    Uint8 neighbours = 0;
 
     for (double offsetX = -1; offsetX <= +1; ++offsetX) {
         for (double offsetY = -1; offsetY <= +1; ++offsetY) {
@@ -242,12 +269,15 @@ static bool determineSpawning(const void *square, void *_) {
             long i = axv.binarySearch(squares, &ns);
             neighbours += i != -1;
 
-            if (neighbours > 3)
+            if (neighbours > rules.birth.nums[rules.birth.len - 1])
                 return false;
         }
     }
 
-    return neighbours == 3;
+    if (rules.birth.isRange)
+        return rules.birth.nums[0] <= neighbours && neighbours <= rules.birth.nums[1];
+    else
+        return memchr(rules.birth.nums, neighbours, sizeof rules.birth.nums);
 }
 
 
@@ -617,6 +647,11 @@ static void destructSnapshot(void *v) {
 }
 
 
+static void destructTemporary(void *t) {
+    if (t) axs.push(tinyPool, t);
+}
+
+
 static int compareSquares(const void *a, const void *b) {
     const Square *s1 = *(Square **) a;
     const Square *s2 = *(Square **) b;
@@ -679,7 +714,7 @@ static void loadPlaintextPattern(const char *s) {
 }
 
 
-static void loadRLEPattern(const char *s) {
+static char *loadRLEPattern(const char *s) {
     while (*s && *s == '#') {
         while (*s && *s != '\n')
             ++s;
@@ -694,13 +729,25 @@ static void loadRLEPattern(const char *s) {
         errno = 0;
         char *tmp;
         *fill = strtoull(s, &tmp, 10);
-        if (errno) return;
+        if (errno) return NULL;
         s = tmp - 1;
         if (fill == &h) break;
         fill = &h;
     }
 
-    while (*s != '\n') ++s;
+    char *rulestring = NULL;
+    while (*s != '\n') {
+        if (*s == '=') {
+            do ++s; while (*s != '\n' && isspace(*s));
+            if (*s == '\n') break;
+            const char *start = s;
+            const char *end = strchr(s, '\n');
+            rulestring = malloc(end - start);
+            memcpy(rulestring, start, end - start - 1);
+            rulestring[end - start] = '\0';
+        }
+        ++s;
+    }
 
     enum States {COUNT, TAG};
     enum States state = COUNT;
@@ -738,4 +785,92 @@ static void loadRLEPattern(const char *s) {
             state = COUNT;
         }
     }
+
+    return rulestring;
 }
+
+
+static int cmpUint8(const void *a, const void *b) {
+    const Uint8 x = **(const Uint8 **) a;
+    const Uint8 y = **(const Uint8 **) b;
+    return (x > y) - (x < y);
+}
+
+
+static void initSingleRule(axvector *nums, struct SingleRule *r) {
+    struct args_removeDuplicates argsrd = {axv.getComparator(nums), NULL};
+    axv.filter(axv.sort(nums), removeDuplicates, &argsrd);
+    if (axv.count(nums, &(Uint8) {9}))
+        axv.discard(nums, 1);
+
+    bool isRange = true;
+    for (axvsnap q = axv.snapshot(nums); q.i < q.len - 1; ++q.i) {
+        Uint8 *x = q.vec[q.i];
+        Uint8 *y = q.vec[q.i + 1];
+        if (*x + 1 != *y) {
+            isRange = false;
+            break;
+        }
+    }
+
+    if (isRange) {
+        r->nums[0] = *(Uint8 *) axv.at(nums, 0);
+        r->nums[1] = *(Uint8 *) axv.at(nums, -1);
+        r->isRange = true;
+        r->len = 2;
+    } else {
+        axv.reverse(nums);
+        r->len = axv.len(nums);
+        r->isRange = false;
+        for (int i = 0; axv.len(nums); ++i, axv.discard(nums, 1))
+            r->nums[i] = *(Uint8 *) axv.top(nums);
+    }
+
+    axv.clear(nums);
+}
+
+
+static Rules parseRulestring(const char *s) {
+    axvector *nums = axv.setDestructor(axv.setComparator(axv.sizedNew(10), cmpUint8), destructTemporary);
+    Rules r;
+
+    // currently only doing B/S notation starting at 'B'
+    ++s;
+    for (int i = 0; isdigit(*s); ++i, ++s) {
+        Uint8 *d = getTinyMemory();
+        *d = *s - '0';
+        axv.push(nums, d);
+    }
+
+    if (axv.len(nums)) {
+        initSingleRule(nums, &r.birth);
+    } else {
+        r.birth.nums[0] = 3;
+        r.birth.nums[1] = 3;
+        r.birth.isRange = true;
+        r.birth.len = 2;
+    }
+
+    while (*s && *s != 'S' && *s != 's') ++s;
+
+    s += !!*s;
+    for (int i = 0; isdigit(*s); ++i, ++s) {
+        Uint8 *d = getTinyMemory();
+        *d = *s - '0';
+        axv.push(nums, d);
+    }
+
+    if (axv.len(nums)) {
+        initSingleRule(nums, &r.survival);
+    } else {
+        r.survival.nums[0] = 2;
+        r.survival.nums[1] = 3;
+        r.survival.isRange = true;
+        r.birth.len = 2;
+    }
+
+    axv.destroy(nums);
+    return r;
+}
+
+

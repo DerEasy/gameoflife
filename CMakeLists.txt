@@ -17,4 +17,4 @@ target_include_directories(gameoflife PRIVATE /usr/include/SDL2)
 
 target_link_libraries(gameoflife PRIVATE SDL2 SDL2_image m)
 
-target_compile_options(gameoflife PRIVATE -Wall -Wextra -Wpedantic -O3)
+target_compile_options(gameoflife PRIVATE -Wall -Wextra -Wpedantic -O0)

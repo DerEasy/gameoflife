@@ -22,8 +22,10 @@ enum GOL_PatternType {
 
 struct GOL_Pattern {
     const char *pattern;
+    const char *rules;
     enum GOL_PatternType type;
-    bool freeString;
+    bool freePattern;
+    bool freeRulestring;
 };
 
 /*
