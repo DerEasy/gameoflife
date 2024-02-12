@@ -247,7 +247,7 @@ static bool determineWorthy(void *square, void *args) {
         if (rules.survival.nums[0] <= neighbours && neighbours <= rules.survival.nums[1])
             axv.push(survivors, s);
     } else {
-        if (memchr(rules.survival.nums, neighbours, sizeof rules.survival.nums))
+        if (memchr(rules.survival.nums, neighbours, rules.birth.len))
             axv.push(survivors, s);
     }
 
@@ -277,7 +277,7 @@ static bool determineSpawning(const void *square, void *_) {
     if (rules.birth.isRange)
         return rules.birth.nums[0] <= neighbours && neighbours <= rules.birth.nums[1];
     else
-        return memchr(rules.birth.nums, neighbours, sizeof rules.birth.nums);
+        return memchr(rules.birth.nums, neighbours, rules.birth.len);
 }
 
 
