@@ -144,6 +144,7 @@ help:
         "    -fp              - Load plaintext pattern file.\n"
         "    -fr              - Load RLE pattern file.\n"
         "    -f               - Load pattern file. Type determined by file extension.\n"
+        "    -r               - Override rulestring.\n"
         "Any option may override previous options. All options and their parameters are space-separated.\n"
         "\n"
         "\n"
