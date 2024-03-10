@@ -27,10 +27,6 @@ union Int64 {
 };
 
 
-static int64_t len(axvector *v);
-static bool resize(axvector *v, uint64_t size);
-
-
 static union Int64 normaliseIndex(uint64_t len, int64_t index) {
     union Int64 i = {.s = index};
     i.u += (i.s < 0) * len;
@@ -44,13 +40,13 @@ static uint64_t toItemSize(uint64_t n) {
 
 
 static int defaultComparator(const void *a, const void *b) {
-    const void *x = *(void **) a;
-    const void *y = *(void **) b;
+    const void *x = *(const void **) a;
+    const void *y = *(const void **) b;
     return (x > y) - (x < y);
 }
 
 
-static axvector *sizedNew(uint64_t size) {
+axvector *axv_sizedNew(uint64_t size) {
     size = MAX(1, size);
     axvector *v = malloc(sizeof *v);
     if (v) v->items = malloc(toItemSize(size));
@@ -70,12 +66,12 @@ static axvector *sizedNew(uint64_t size) {
 }
 
 
-static axvector *new(void) {
-    return sizedNew(7);
+axvector *axv_new(void) {
+    return axv_sizedNew(7);
 }
 
 
-static void *destroy(axvector *v) {
+void *axv_destroy(axvector *v) {
     if (v->destroy) while (v->len) {
         v->destroy(v->items[--v->len]);
     }
@@ -87,34 +83,34 @@ static void *destroy(axvector *v) {
 }
 
 
-static axvector *iref(axvector *v) {
+axvector *axv_iref(axvector *v) {
     ++v->refcount;
     return v;
 }
 
 
-static bool dref(axvector *v) {
+bool axv_dref(axvector *v) {
     const bool destroyed = --v->refcount <= 0;
-    if (destroyed) destroy(v);
+    if (destroyed) axv_destroy(v);
     return destroyed;
 }
 
 
-static int64_t refs(axvector *v) {
+int64_t axv_refs(axvector *v) {
     return v->refcount;
 }
 
 
-static axvsnap snapshot(axvector *v) {
+axvsnap axv_snapshot(axvector *v) {
     return (axvsnap) {
         .i = 0,
-        .len = len(v),
+        .len = axv_len(v),
         .vec = v->items
     };
 }
 
 
-static bool push(axvector *v, void *val) {
+bool axv_push(axvector *v, void *val) {
     if (v->len >= v->cap) {
         uint64_t cap = (v->cap << 1) | 1;  // add another bit
         void **items = realloc(v->items, toItemSize(cap));
@@ -128,29 +124,28 @@ static bool push(axvector *v, void *val) {
 }
 
 
-static void *pop(axvector *v) {
+void *axv_pop(axvector *v) {
     return v->len ? v->items[--v->len] : NULL;
 }
 
 
-static void *top(axvector *v) {
+void *axv_top(axvector *v) {
     return v->len ? v->items[v->len - 1] : NULL;
 }
 
 
-static int64_t len(axvector *v) {
-    union Int64 len = {v->len};
-    return len.s;
+int64_t axv_len(axvector *v) {
+    return (const union Int64) {v->len}.s;
 }
 
 
-static void *at(axvector *v, int64_t index) {
+void *axv_at(axvector *v, int64_t index) {
     uint64_t i = normaliseIndex(v->len, index).u;
     return i < v->len ? v->items[i] : NULL;
 }
 
 
-static bool set(axvector *v, int64_t index, void *val) {
+bool axv_set(axvector *v, int64_t index, void *val) {
     uint64_t i = normaliseIndex(v->len, index).u;
     if (i >= v->len) return true;
     v->items[i] = val;
@@ -158,7 +153,7 @@ static bool set(axvector *v, int64_t index, void *val) {
 }
 
 
-static bool swap(axvector *v, int64_t index1, int64_t index2) {
+bool axv_swap(axvector *v, int64_t index1, int64_t index2) {
     uint64_t i1 = normaliseIndex(v->len, index1).u;
     uint64_t i2 = normaliseIndex(v->len, index2).u;
     if (i1 >= v->len || i2 >= v->len)
@@ -171,7 +166,7 @@ static bool swap(axvector *v, int64_t index1, int64_t index2) {
 }
 
 
-static axvector *reverse(axvector *v) {
+axvector *axv_reverse(axvector *v) {
     void **l = v->items;
     void **r = v->items + v->len - 1;
 
@@ -186,14 +181,14 @@ static axvector *reverse(axvector *v) {
 }
 
 
-static bool reverseSection(axvector *v, int64_t index1, int64_t index2) {
+bool axv_reverseSection(axvector *v, int64_t index1, int64_t index2) {
     uint64_t i1 = normaliseIndex(v->len, index1).u;
-    uint64_t i2 = normaliseIndex(v->len, index2).u - 1;
-    if (i1 >= v->len || i2 >= v->len)
+    uint64_t i2 = normaliseIndex(v->len, index2).u;
+    if (i1 >= v->len || i2 > v->len)
         return true;
 
     void **l = v->items + i1;
-    void **r = v->items + i2;
+    void **r = v->items + i2 - 1;
 
     while (l < r) {
         void *tmp = *l;
@@ -206,29 +201,30 @@ static bool reverseSection(axvector *v, int64_t index1, int64_t index2) {
 }
 
 
-static axvector *rotate(axvector *v, int64_t n) {
-    if (n == 0) return v;
-    reverse(v);
-    reverseSection(v, 0, n - 1);
-    reverseSection(v, n, -1);
+axvector *axv_rotate(axvector *v, int64_t k) {
+    k %= axv_len(v);
+    if (k == 0) return v;
+    axv_reverse(v);
+    axv_reverseSection(v, 0, k);
+    axv_reverseSection(v, k, axv_len(v));
     return v;
 }
 
 
-static bool shift(axvector *v, int64_t index, int64_t n) {
+bool axv_shift(axvector *v, int64_t index, int64_t n) {
     if (n == 0)
         return false;
 
     if (n > 0) {
         const uint64_t oldlen = v->len;
-        if (v->len + n > v->cap && resize(v, v->len + n))
+        if (v->len + n > v->cap && axv_resize(v, v->len + n))
             return true;
         memmove(v->items + index + n, v->items + index, toItemSize(oldlen - n - 1));
         memset(v->items + index, 0, toItemSize(n));
         if (oldlen == v->len)
             v->len += n;
     } else {
-        n = MIN(-n, len(v) - index);
+        n = MIN(-n, axv_len(v) - index);
         if (v->destroy) {
             for (int64_t i = index; i < index + n; ++i)
                 v->destroy(v->items[i]);
@@ -241,19 +237,18 @@ static bool shift(axvector *v, int64_t index, int64_t n) {
 }
 
 
-static int64_t discard(axvector *v, int64_t n) {
-    const int64_t removed = n = MIN(len(v), n);
+axvector *axv_discard(axvector *v, uint64_t n) {
+    n = v->len - MIN(v->len, n);
 
-    if (v->destroy) while (n > 0) {
-        v->destroy(v->items[v->len - n--]);
+    if (v->destroy) while (v->len > n) {
+        v->destroy(v->items[--v->len]);
     }
 
-    v->len -= removed;
-    return removed;
+    return v;
 }
 
 
-static axvector *clear(axvector *v) {
+axvector *axv_clear(axvector *v) {
     if (v->destroy) while (v->len) {
         v->destroy(v->items[--v->len]);
     }
@@ -263,8 +258,8 @@ static axvector *clear(axvector *v) {
 }
 
 
-static axvector *copy(axvector *v) {
-    axvector *v2 = sizedNew(v->cap);
+axvector *axv_copy(axvector *v) {
+    axvector *v2 = axv_sizedNew(v->cap);
     if (!v2) return NULL;
 
     memcpy(v2->items, v->items, toItemSize(v->len));
@@ -276,12 +271,12 @@ static axvector *copy(axvector *v) {
 }
 
 
-static bool extend(axvector *v1, axvector *v2) {
+bool axv_extend(axvector *v1, axvector *v2) {
     if (v1 == v2)
         return false;
 
     const uint64_t extlen = v1->len + v2->len;
-    if (extlen > v1->cap && resize(v1, extlen))
+    if (extlen > v1->cap && axv_resize(v1, extlen))
         return true;
 
     memcpy(v1->items + v1->len, v2->items, toItemSize(v2->len));
@@ -291,9 +286,9 @@ static bool extend(axvector *v1, axvector *v2) {
 }
 
 
-static bool concat(axvector *v1, axvector *v2) {
+bool axv_concat(axvector *v1, axvector *v2) {
     const uint64_t extlen = v1->len + v2->len;
-    if (extlen > v1->cap && resize(v1, extlen))
+    if (extlen > v1->cap && axv_resize(v1, extlen))
         return true;
 
     memcpy(v1->items + v1->len, v2->items, toItemSize(v2->len));
@@ -302,13 +297,13 @@ static bool concat(axvector *v1, axvector *v2) {
 }
 
 
-static axvector *slice(axvector *v, int64_t index1, int64_t index2) {
-    int64_t i1 = index1 + (index1 < 0) * len(v);
-    int64_t i2 = index2 + (index2 < 0) * len(v);
-    i1 = MAX(0, i1); i1 = MIN(i1, len(v));
-    i2 = MAX(0, i2); i2 = MIN(i2, len(v));
+axvector *axv_slice(axvector *v, int64_t index1, int64_t index2) {
+    int64_t i1 = index1 + (index1 < 0) * axv_len(v);
+    int64_t i2 = index2 + (index2 < 0) * axv_len(v);
+    i1 = MAX(0, i1); i1 = MIN(i1, axv_len(v));
+    i2 = MAX(0, i2); i2 = MIN(i2, axv_len(v));
 
-    axvector *v2 = sizedNew(v->len);
+    axvector *v2 = axv_sizedNew(v->len);
     if (!v2) return NULL;
 
     memcpy(v2->items, v->items + i1, toItemSize(i2 - i1));
@@ -320,13 +315,13 @@ static axvector *slice(axvector *v, int64_t index1, int64_t index2) {
 }
 
 
-static axvector *rslice(axvector *v, int64_t index1, int64_t index2) {
-    int64_t i1 = index1 + (index1 < 0) * len(v);
-    int64_t i2 = index2 + (index2 < 0) * len(v);
-    i1 = MAX(0, i1); i1 = MIN(i1, len(v));
-    i2 = MAX(0, i2); i2 = MIN(i2, len(v));
+axvector *axv_rslice(axvector *v, int64_t index1, int64_t index2) {
+    int64_t i1 = index1 + (index1 < 0) * axv_len(v);
+    int64_t i2 = index2 + (index2 < 0) * axv_len(v);
+    i1 = MAX(0, i1); i1 = MIN(i1, axv_len(v));
+    i2 = MAX(0, i2); i2 = MIN(i2, axv_len(v));
 
-    axvector *v2 = sizedNew(v->len);
+    axvector *v2 = axv_sizedNew(v->len);
     if (!v2) return NULL;
 
     void **save = v2->items;
@@ -342,7 +337,7 @@ static axvector *rslice(axvector *v, int64_t index1, int64_t index2) {
 }
 
 
-static bool resize(axvector *v, uint64_t size) {
+bool axv_resize(axvector *v, uint64_t size) {
     size = MAX(1, size);
 
     if (size < v->len && v->destroy) while (v->len > size) {
@@ -359,13 +354,13 @@ static bool resize(axvector *v, uint64_t size) {
 }
 
 
-static axvector *destroyItem(axvector *v, void *val) {
+axvector *axv_destroyItem(axvector *v, void *val) {
     if (v->destroy) v->destroy(val);
     return v;
 }
 
 
-static void *max(axvector *v) {
+void *axv_max(axvector *v) {
     if (v->len == 0) return NULL;
 
     void *max = *v->items;
@@ -379,7 +374,7 @@ static void *max(axvector *v) {
 }
 
 
-static void *min(axvector *v) {
+void *axv_min(axvector *v) {
     if (v->len == 0) return NULL;
 
     void *min = *v->items;
@@ -393,31 +388,31 @@ static void *min(axvector *v) {
 }
 
 
-static bool any(axvector *v, bool (*f)(const void *)) {
+bool axv_any(axvector *v, bool (*f)(const void *, void *), void *arg) {
     void **val = v->items;
     void **bound = v->items + v->len;
 
     while (val < bound) {
-        if (f(*val++)) return true;
+        if (f(*val++, arg)) return true;
     }
 
     return false;
 }
 
 
-static bool all(axvector *v, bool (*f)(const void *)) {
+bool axv_all(axvector *v, bool (*f)(const void *, void *), void *arg) {
     void **val = v->items;
     void **bound = v->items + v->len;
 
     while (val < bound) {
-        if (!f(*val++)) return false;
+        if (!f(*val++, arg)) return false;
     }
 
     return true;
 }
 
 
-static int64_t count(axvector *v, void *val) {
+int64_t axv_count(axvector *v, void *val) {
     int64_t n = 0;
     void **curr = v->items;
     void **bound = v->items + v->len;
@@ -426,7 +421,7 @@ static int64_t count(axvector *v, void *val) {
 }
 
 
-static bool compare(axvector *v1, axvector *v2) {
+bool axv_compare(axvector *v1, axvector *v2) {
     if (v1->len != v2->len) return false;
 
     for (uint64_t i = 0; i < v1->len; ++i) {
@@ -439,7 +434,7 @@ static bool compare(axvector *v1, axvector *v2) {
 }
 
 
-static axvector *map(axvector *v, void *(*f)(void *)) {
+axvector *axv_map(axvector *v, void *(*f)(void *)) {
     void **val = v->items;
     void **bound = v->items + v->len;
 
@@ -452,7 +447,7 @@ static axvector *map(axvector *v, void *(*f)(void *)) {
 }
 
 
-static axvector *filter(axvector *v, bool (*f)(const void *, void *), void *arg) {
+axvector *axv_filter(axvector *v, bool (*f)(const void *, void *), void *arg) {
     uint64_t len = 0;
     const bool shouldFree = v->destroy;
 
@@ -469,8 +464,8 @@ static axvector *filter(axvector *v, bool (*f)(const void *, void *), void *arg)
 }
 
 
-static axvector *filterSplit(axvector *v, bool (*f)(const void *, void *), void *arg) {
-    axvector *v2 = sizedNew(v->len);
+axvector *axv_filterSplit(axvector *v, bool (*f)(const void *, void *), void *arg) {
+    axvector *v2 = axv_sizedNew(v->len);
     if (!v2) return NULL;
 
     uint64_t len1 = 0, len2 = 0;
@@ -491,8 +486,8 @@ static axvector *filterSplit(axvector *v, bool (*f)(const void *, void *), void 
 }
 
 
-static axvector *foreach(axvector *v, bool (*f)(void *, void *), void *arg) {
-    const int64_t length = len(v);
+axvector *axv_foreach(axvector *v, bool (*f)(void *, void *), void *arg) {
+    const int64_t length = axv_len(v);
     for (int64_t i = 0; i < length; ++i) {
         if (!f(v->items[i], arg)) {
             return arg;
@@ -503,8 +498,8 @@ static axvector *foreach(axvector *v, bool (*f)(void *, void *), void *arg) {
 }
 
 
-static axvector *rforeach(axvector *v, bool (*f)(void *, void *), void *arg) {
-    for (int64_t i = len(v) - 1; i >= 0; --i) {
+axvector *axv_rforeach(axvector *v, bool (*f)(void *, void *), void *arg) {
+    for (int64_t i = axv_len(v) - 1; i >= 0; --i) {
         if (!f(v->items[i], arg)) {
             return arg;
         }
@@ -514,12 +509,12 @@ static axvector *rforeach(axvector *v, bool (*f)(void *, void *), void *arg) {
 }
 
 
-static axvector *forSection(axvector *v, bool (*f)(void *, void *), void *arg,
-                            int64_t index1, int64_t index2) {
+axvector *axv_forSection(axvector *v, bool (*f)(void *, void *), void *arg,
+                         int64_t index1, int64_t index2) {
 
     int64_t i1 = normaliseIndex(v->len, index1).s;
     int64_t i2 = normaliseIndex(v->len, index2).s;
-    i2 = MIN(len(v), i2); i2 = MAX(0, i2);
+    i2 = MIN(axv_len(v), i2); i2 = MAX(0, i2);
 
     for (int64_t i = i1; i < i2; ++i) {
         if (!f(v->items[i], arg)) {
@@ -531,7 +526,7 @@ static axvector *forSection(axvector *v, bool (*f)(void *, void *), void *arg,
 }
 
 
-static bool isSorted(axvector *v) {
+bool axv_isSorted(axvector *v) {
     for (uint64_t i = 1; i < v->len; ++i) {
         if (v->cmp(v->items + i - 1, v->items + i) != 0) {
             return false;
@@ -542,13 +537,13 @@ static bool isSorted(axvector *v) {
 }
 
 
-static axvector *sort(axvector *v) {
+axvector *axv_sort(axvector *v) {
     qsort(v->items, v->len, sizeof *v->items, v->cmp);
     return v;
 }
 
 
-static axvector *sortSection(axvector *v, int64_t index1, int64_t index2) {
+axvector *axv_sortSection(axvector *v, int64_t index1, int64_t index2) {
     uint64_t i1 = normaliseIndex(v->len, index1).u;
     uint64_t i2 = normaliseIndex(v->len, index2).u;
     qsort(v->items + i1, i2 - i1, sizeof *v->items, v->cmp);
@@ -556,14 +551,14 @@ static axvector *sortSection(axvector *v, int64_t index1, int64_t index2) {
 }
 
 
-static int64_t binarySearch(axvector *v, void *val) {
+int64_t axv_binarySearch(axvector *v, void *val) {
     void **found = bsearch(&val, v->items, v->len, sizeof *v->items, v->cmp);
     return found ? found - v->items : -1;
 }
 
 
-static int64_t linearSearch(axvector *v, void *val) {
-    const int64_t length = len(v);
+int64_t axv_linearSearch(axvector *v, void *val) {
+    const int64_t length = axv_len(v);
     for (int64_t i = 0; i < length; ++i) {
         if (v->cmp(&val, v->items + i) == 0) {
             return i;
@@ -574,10 +569,10 @@ static int64_t linearSearch(axvector *v, void *val) {
 }
 
 
-static int64_t linearSearchSection(axvector *v, void *val, int64_t index1, int64_t index2) {
+int64_t axv_linearSearchSection(axvector *v, void *val, int64_t index1, int64_t index2) {
     int64_t i1 = normaliseIndex(v->len, index1).s;
     int64_t i2 = normaliseIndex(v->len, index2).s;
-    if (i1 >= len(v) || i2 > len(v) || i1 < 0 || i2 < 0)
+    if (i1 >= axv_len(v) || i2 > axv_len(v) || i1 < 0 || i2 < 0)
         return -1;
 
     for (int64_t i = i1; i < i2; ++i) {
@@ -590,103 +585,44 @@ static int64_t linearSearchSection(axvector *v, void *val, int64_t index1, int64
 }
 
 
-static axvector *setComparator(axvector *v, int (*cmp)(const void *, const void *)) {
+axvector *axv_setComparator(axvector *v, int (*cmp)(const void *, const void *)) {
     v->cmp = cmp ? cmp : defaultComparator;
     return v;
 }
 
 
-static int (*getComparator(axvector *v))(const void *, const void *) {
+int (*axv_getComparator(axvector *v))(const void *, const void *) {
     return v->cmp;
 }
 
 
-static axvector *setDestructor(axvector *v, void (*destroy)(void *)) {
+axvector *axv_setDestructor(axvector *v, void (*destroy)(void *)) {
     v->destroy = destroy;
     return v;
 }
 
 
-static void (*getDestructor(axvector *v))(void *) {
+void (*axv_getDestructor(axvector *v))(void *) {
     return v->destroy;
 }
 
 
-static axvector *setContext(axvector *v, void *context) {
+axvector *axv_setContext(axvector *v, void *context) {
     v->context = context;
     return v;
 }
 
 
-static void *getContext(axvector *v) {
+void *axv_getContext(axvector *v) {
     return v->context;
 }
 
 
-static void **data(axvector *v) {
+void **axv_data(axvector *v) {
     return v->items;
 }
 
 
-static int64_t cap(axvector *v) {
-    union Int64 cap = {v->cap};
-    return cap.s;
+int64_t axv_cap(axvector *v) {
+    return (const union Int64) {v->cap}.s;
 }
-
-
-const struct axvectorFn axv = {
-        sizedNew,
-        new,
-        destroy,
-        iref,
-        dref,
-        refs,
-        snapshot,
-        push,
-        pop,
-        top,
-        len,
-        at,
-        set,
-        swap,
-        reverse,
-        reverseSection,
-        rotate,
-        shift,
-        discard,
-        clear,
-        copy,
-        extend,
-        concat,
-        slice,
-        rslice,
-        resize,
-        destroyItem,
-        max,
-        min,
-        any,
-        all,
-        count,
-        compare,
-        map,
-        filter,
-        filterSplit,
-        foreach,
-        rforeach,
-        forSection,
-        isSorted,
-        sort,
-        sortSection,
-        binarySearch,
-        linearSearch,
-        linearSearchSection,
-        setComparator,
-        getComparator,
-        setDestructor,
-        getDestructor,
-        setContext,
-        getContext,
-        data,
-        cap
-};
-

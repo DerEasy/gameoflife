@@ -113,7 +113,7 @@ void gameOfLife(int w, int h, unsigned tickrate_, struct GOL_Pattern patinfo) {
     chosenTexture = *textures;
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_DisplayMode dm; SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-    squares = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
+    squares = axv_setDestructor(axv_setComparator(axv_new(), compareSquares), destructSquare);
     inputs = axq.setDestructor(axq.new(), destructInput);
     tinyPool = axs.setDestructor(axs.new(), free);
     snapshots = axs.setDestructor(axs.new(), destructSnapshot);
@@ -146,7 +146,7 @@ void gameOfLife(int w, int h, unsigned tickrate_, struct GOL_Pattern patinfo) {
     while (tick());
 
     axs.destroy(snapshots);
-    axv.destroy(squares);
+    axv_destroy(squares);
     axq.destroy(inputs);
     axs.destroy(tinyPool);
     SDL_DestroyTexture(textures[0]);
@@ -197,10 +197,10 @@ static void insertionSortTail(axvector *v, int n) {
     if (n <= 0)
         return;
 
-    axvsnap s1 = axv.snapshot(v);
-    s1.i = axv.len(v) - n;
-    axvsnap s2 = axv.snapshot(v);
-    int (*cmp)(const void *, const void *) = axv.getComparator(v);
+    axvsnap s1 = axv_snapshot(v);
+    s1.i = axv_len(v) - n;
+    axvsnap s2 = axv_snapshot(v);
+    int (*cmp)(const void *, const void *) = axv_getComparator(v);
 
     for (; s1.i < s1.len; ++s1.i) {
         for (s2.i = s1.i; s2.i > 0; --s2.i) {
@@ -227,28 +227,28 @@ static bool determineWorthy(void *square, void *args) {
                 continue;
 
             Square neighbour = {s->x + offsetX, s->y + offsetY};
-            long i = axv.binarySearch(squares, &neighbour);
+            long i = axv_binarySearch(squares, &neighbour);
             neighbours += i != -1;
 
-            if (i == -1 && axv.binarySearch(potentials, &neighbour) == -1) {
+            if (i == -1 && axv_binarySearch(potentials, &neighbour) == -1) {
                 Square *potential = getTinyMemory();
                 *potential = neighbour;
-                axv.push(potentials, potential);
+                axv_push(potentials, potential);
                 ++taillen;
             }
         }
     }
 
     // insertion sorting the last few items is HUGELY more efficient than
-    // calling axv.sort(potentials) every damn time this function is called (which is a lot!)
+    // calling axv_sort(potentials) every damn time this function is called (which is a lot!)
     insertionSortTail(potentials, taillen);
 
     if (rules.survival.isRange) {
         if (rules.survival.nums[0] <= neighbours && neighbours <= rules.survival.nums[1])
-            axv.push(survivors, s);
+            axv_push(survivors, s);
     } else {
         if (memchr(rules.survival.nums, neighbours, rules.birth.len))
-            axv.push(survivors, s);
+            axv_push(survivors, s);
     }
 
     return true;
@@ -266,7 +266,7 @@ static bool determineSpawning(const void *square, void *_) {
                 continue;
 
             Square ns = {s->x + offsetX, s->y + offsetY};
-            long i = axv.binarySearch(squares, &ns);
+            long i = axv_binarySearch(squares, &ns);
             neighbours += i != -1;
 
             if (neighbours > rules.birth.nums[rules.birth.len - 1])
@@ -282,8 +282,8 @@ static bool determineSpawning(const void *square, void *_) {
 
 
 static bool keepIdenticalSquares(const void *square, void *survivors) {
-    if (square == axv.top(survivors)) {
-        axv.pop(survivors);
+    if (square == axv_top(survivors)) {
+        axv_pop(survivors);
         return true;
     } else {
         return false;
@@ -292,16 +292,16 @@ static bool keepIdenticalSquares(const void *square, void *survivors) {
 
 
 static void processLife(void) {
-    axvector *potentials = axv.setDestructor(axv.setComparator(axv.new(), compareSquares), destructSquare);
-    axvector *survivors = axv.new();
-    struct args_removeDuplicates argsrd = {axv.getComparator(squares), NULL};
-    axv.filter(axv.sort(squares), removeDuplicates, &argsrd);
-    axv.foreach(squares, determineWorthy, (axvector *[2]) {survivors, potentials});
-    axv.filter(potentials, determineSpawning, NULL);
-    axv.filter(squares, keepIdenticalSquares, axv.reverse(survivors));
-    axv.extend(squares, potentials);
-    axv.destroy(survivors);
-    axv.destroy(potentials);
+    axvector *potentials = axv_setDestructor(axv_setComparator(axv_new(), compareSquares), destructSquare);
+    axvector *survivors = axv_new();
+    struct args_removeDuplicates argsrd = {axv_getComparator(squares), NULL};
+    axv_filter(axv_sort(squares), removeDuplicates, &argsrd);
+    axv_foreach(squares, determineWorthy, (axvector *[2]) {survivors, potentials});
+    axv_filter(potentials, determineSpawning, NULL);
+    axv_filter(squares, keepIdenticalSquares, axv_reverse(survivors));
+    axv_extend(squares, potentials);
+    axv_destroy(survivors);
+    axv_destroy(potentials);
 }
 
 
@@ -349,7 +349,7 @@ static void processInputs(void) {
             double ratio = renW / camera.w;
             square->x = floor(camera.x + (double) input->x / ratio);
             square->y = floor(camera.y + (double) input->y / ratio);
-            axv.push(squares, square);
+            axv_push(squares, square);
             break;
         }
         case SQUARE_DELETE: {
@@ -358,7 +358,7 @@ static void processInputs(void) {
                     floor(camera.x + (double) input->x / cameraRatio),
                     floor(camera.y + (double) input->y / cameraRatio)
             };
-            axv.filter(squares, filterEqualSquares, &square);
+            axv_filter(squares, filterEqualSquares, &square);
             break;
         }
         case PAUSE: {
@@ -366,7 +366,7 @@ static void processInputs(void) {
             break;
         }
         case GENOCIDE: {
-            axv.clear(squares);
+            axv_clear(squares);
             break;
         }
         case TICKRATE: {
@@ -391,12 +391,12 @@ static void processInputs(void) {
             break;
         }
         case BACKUP: {
-            axs.push(snapshots, axv.setDestructor(axv.map(axv.copy(squares), mapNewSquares), axv.getDestructor(squares)));
+            axs.push(snapshots, axv_setDestructor(axv_map(axv_copy(squares), mapNewSquares), axv_getDestructor(squares)));
             break;
         }
         case RESTORE: {
             if (axs.len(snapshots)) {
-                axv.destroy(squares);
+                axv_destroy(squares);
                 squares = axs.pop(snapshots);
             }
             break;
@@ -419,7 +419,7 @@ static void draw(void) {
     DRect pos;
     pos.w = pos.h = 1;
 
-    for (axvsnap s = axv.snapshot(squares); s.i < s.len; ++s.i) {
+    for (axvsnap s = axv_snapshot(squares); s.i < s.len; ++s.i) {
         SDL_FRect dst;
         Square *square = s.vec[s.i];
         pos.x = square->x;
@@ -627,7 +627,7 @@ static void *getTinyMemory(void) {
             abort();
         }
     }
-    
+
     return axs.pop(tinyPool);
 }
 
@@ -643,7 +643,7 @@ static void destructInput(void *i) {
 
 
 static void destructSnapshot(void *v) {
-    if (v) axv.destroy(v);
+    if (v) axv_destroy(v);
 }
 
 
@@ -708,7 +708,7 @@ static void loadPlaintextPattern(const char *s) {
             Square *square = getTinyMemory();
             square->x = (double) x;
             square->y = (double) y;
-            axv.push(squares, square);
+            axv_push(squares, square);
         }
     }
 }
@@ -777,7 +777,7 @@ static char *loadRLEPattern(const char *s) {
                     Square *square = getTinyMemory();
                     square->x = (double) x++;
                     square->y = (double) y;
-                    axv.push(squares, square);
+                    axv_push(squares, square);
                 }
             }
 
@@ -798,13 +798,13 @@ static int cmpUint8(const void *a, const void *b) {
 
 
 static void initSingleRule(axvector *nums, struct SingleRule *r) {
-    struct args_removeDuplicates argsrd = {axv.getComparator(nums), NULL};
-    axv.filter(axv.sort(nums), removeDuplicates, &argsrd);
-    if (axv.count(nums, &(Uint8) {9}))
-        axv.discard(nums, 1);
+    struct args_removeDuplicates argsrd = {axv_getComparator(nums), NULL};
+    axv_filter(axv_sort(nums), removeDuplicates, &argsrd);
+    if (axv_count(nums, &(Uint8) {9}))
+        axv_discard(nums, 1);
 
     bool isRange = true;
-    for (axvsnap q = axv.snapshot(nums); q.i < q.len - 1; ++q.i) {
+    for (axvsnap q = axv_snapshot(nums); q.i < q.len - 1; ++q.i) {
         Uint8 *x = q.vec[q.i];
         Uint8 *y = q.vec[q.i + 1];
         if (*x + 1 != *y) {
@@ -814,24 +814,24 @@ static void initSingleRule(axvector *nums, struct SingleRule *r) {
     }
 
     if (isRange) {
-        r->nums[0] = *(Uint8 *) axv.at(nums, 0);
-        r->nums[1] = *(Uint8 *) axv.at(nums, -1);
+        r->nums[0] = *(Uint8 *) axv_at(nums, 0);
+        r->nums[1] = *(Uint8 *) axv_at(nums, -1);
         r->isRange = true;
         r->len = 2;
     } else {
-        axv.reverse(nums);
-        r->len = axv.len(nums);
+        axv_reverse(nums);
+        r->len = axv_len(nums);
         r->isRange = false;
-        for (int i = 0; axv.len(nums); ++i, axv.discard(nums, 1))
-            r->nums[i] = *(Uint8 *) axv.top(nums);
+        for (int i = 0; axv_len(nums); ++i, axv_discard(nums, 1))
+            r->nums[i] = *(Uint8 *) axv_top(nums);
     }
 
-    axv.clear(nums);
+    axv_clear(nums);
 }
 
 
 static Rules parseRulestring(const char *s) {
-    axvector *nums = axv.setDestructor(axv.setComparator(axv.sizedNew(10), cmpUint8), destructTemporary);
+    axvector *nums = axv_setDestructor(axv_setComparator(axv_sizedNew(10), cmpUint8), destructTemporary);
     Rules r;
 
     // currently only doing B/S notation starting at 'B'
@@ -839,10 +839,10 @@ static Rules parseRulestring(const char *s) {
     for (int i = 0; isdigit(*s); ++i, ++s) {
         Uint8 *d = getTinyMemory();
         *d = *s - '0';
-        axv.push(nums, d);
+        axv_push(nums, d);
     }
 
-    if (axv.len(nums)) {
+    if (axv_len(nums)) {
         initSingleRule(nums, &r.birth);
     } else {
         r.birth.nums[0] = 3;
@@ -857,10 +857,10 @@ static Rules parseRulestring(const char *s) {
     for (int i = 0; isdigit(*s); ++i, ++s) {
         Uint8 *d = getTinyMemory();
         *d = *s - '0';
-        axv.push(nums, d);
+        axv_push(nums, d);
     }
 
-    if (axv.len(nums)) {
+    if (axv_len(nums)) {
         initSingleRule(nums, &r.survival);
     } else {
         r.survival.nums[0] = 2;
@@ -869,7 +869,7 @@ static Rules parseRulestring(const char *s) {
         r.birth.len = 2;
     }
 
-    axv.destroy(nums);
+    axv_destroy(nums);
     return r;
 }
 
